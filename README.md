@@ -35,4 +35,10 @@
   * [참고 URL](https://sas-study.tistory.com/432)
   * [참고 URL2](https://velog.io/@heetaeheo/OkHttp-WebSocket)
   * [참고 URL3](https://itnext.io/websockets-in-android-with-okhttp-and-viewmodel-776a9eed67b5)
+- 2023년 7월 23일
+  1. 웹소켓 로직 적용(테스트 확인 필요)
+  2. Presentation의 ViewModel
+     ->Domain의 UseCase,Repository(Interface)
+     ->Data의 Repository(Implements),RemoteDataSource로 향하는 user request scene 적용
+     추후, 응답 데이터를 받아 Presentation 영역으로의 reponse scene 적용 예정
 # 비고 & 특이사항
