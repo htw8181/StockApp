@@ -6,6 +6,10 @@ import okhttp3.WebSocketListener
 import javax.inject.Inject
 
 class StockRepositoryImpl @Inject constructor(private val stockRemoteDataSource: StockRemoteDataSource) : StockRepository {
+    override fun getCoinMarketCodeAll() {
+        stockRemoteDataSource.getCoinMarketCodeAll()
+    }
+
     override fun getRealTimeStock(webSocketListener: WebSocketListener) {
         stockRemoteDataSource.getRealTimeStock(webSocketListener)
     }

@@ -18,6 +18,7 @@
 - RoomDB
 - Chart??
 - Google Material Design
+- Retrofit
 
 # 개발일지
 - 2023년 7월 19일,21일
@@ -33,7 +34,7 @@
   * [참고 URL5](https://developer.android.com/codelabs/android-hilt#0)
   * [참고 URL6](https://thinking-face.tistory.com/entry/Hilt-2-Dependency-Injection-with-Hilt)
   3. WebSocket 스터디
-  * [참고 URL](https://sas-study.tistory.com/432)
+  * [참고 URL1](https://sas-study.tistory.com/432)
   * [참고 URL2](https://velog.io/@heetaeheo/OkHttp-WebSocket)
   * [참고 URL3](https://itnext.io/websockets-in-android-with-okhttp-and-viewmodel-776a9eed67b5)
   * [참고 URL4](https://docs.upbit.com/reference/test-and-request-sample)
@@ -45,4 +46,12 @@
      추후, 응답 데이터를 받아 Presentation 영역으로의 response scene 적용 예정
 - 2023년 7월 27일
   1. 웹소켓 동작 확인을 위해 업비트 웹소켓 URL을 활용하여 비트코인 원화 실시간 데이터 수신 로직 적용
+  2. 가상화폐 마켓코드를 얻어오기 위해 Retrofit API 통한 서버 연동 로직 적용
+     (코루틴으로 retrofit 사용시 enqueue 메소드를 적용할 필요가 없음)
+  * [참고 URL1](https://it4edu.tistory.com/159)
+  * [참고 URL2](https://notepad96.tistory.com/194)
+  * [참고 URL3](https://velog.io/@jeongminji4490/Retrofit-Call-vs-Response-and-Kotlin-Result)
+  * [참고 URL4](https://codechacha.com/ko/android-coroutine-retrofit/)
+  * [참고 URL5](https://seokzoo.tistory.com/4)
 # 비고 & 특이사항
+  * 앱 시작시 마켓코드를 받아 RoomDB에 저장해 둘 것!!

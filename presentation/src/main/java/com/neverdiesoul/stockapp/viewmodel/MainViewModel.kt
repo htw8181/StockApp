@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
 import com.neverdiesoul.data.repository.remote.websocket.UpbitType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitWebSocketResponseData
+import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllUseCase
 import com.neverdiesoul.domain.usecase.GetRealTimeStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import okhttp3.Response
@@ -16,12 +17,15 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val getRealTimeStockUseCase: GetRealTimeStockUseCase,
+    private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
     init {
         getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
     }
 
     fun getRealTimeStock() {
+        getCoinMarketCodeAllUseCase()
         getRealTimeStockUseCase()
     }
     private class RealTimeStockListener : WebSocketListener() {
