@@ -29,6 +29,7 @@ class StockRemoteDataSourceImpl @Inject constructor() : StockRemoteDataSource {
                 .build()
 
             socket = okHttpClient.newWebSocket(request, webSocketListener)
+            //okHttpClient.dispatcher.executorService.shutdown()
         }
     }
 

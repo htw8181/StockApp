@@ -74,4 +74,7 @@ dependencies {
 
     // WebSocket dependencies
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+
+    // Gson dependencies
+    implementation "com.google.code.gson:gson:$gson_version"
 }
