@@ -4,6 +4,7 @@ import android.util.Log
 import com.neverdiesoul.data.repository.api.ApiClient
 import com.neverdiesoul.data.repository.api.ApiInterface
 import com.neverdiesoul.data.repository.api.CoinMarketCode
+import com.neverdiesoul.data.repository.remote.websocket.WebSocketConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,16 +31,16 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
                 if (response.isSuccessful) {
                     response.body()?.forEach { Log.d("코인 마켓 코드",it.toString()) }
                 } else {
-                    Log.d("코인 마켓 코드 수신 에러", "${response.code()} : ${response.message()}")
+                    Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.d("코인 마켓 코드 수신 에러", "${e.message}")
+                Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${e.message}")
             }
         }
     }
 
     override fun getRealTimeStock(webSocketListener: WebSocketListener) {
-        Log.d("웹소켓", "통신 시작")
+        Log.d(WebSocketConstants.TAG, "통신 시작")
         coroutineScope.launch {
 
             val request = Request.Builder()

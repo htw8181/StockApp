@@ -3,6 +3,10 @@ package com.neverdiesoul.data.repository.remote.websocket
 import com.google.gson.annotations.SerializedName
 
 
+object WebSocketConstants {
+    const val TAG = "UpbitWebSocket"
+}
+
 data class UpbitTicket(val ticket: String)
 data class UpbitType(val type: String, val codes: List<String>)
 
