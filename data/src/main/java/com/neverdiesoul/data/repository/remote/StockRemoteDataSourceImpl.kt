@@ -53,6 +53,7 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
 
     override fun closeRealTimeStock() {
         coroutineScope.launch {
+            socket.cancel()
             socket.close(ApiClient.WEB_SOCKET_NORMAL_CLOSURE_STATUS,"closeRealTimeStock!!")
         }
     }
