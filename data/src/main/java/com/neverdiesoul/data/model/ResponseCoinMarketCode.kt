@@ -1,8 +1,8 @@
-package com.neverdiesoul.data.repository.api
+package com.neverdiesoul.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class CoinMarketCode(
+data class ResponseCoinMarketCode(
     @SerializedName("market")
     val market: String,
     @SerializedName("korean_name")

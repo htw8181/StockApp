@@ -1,4 +1,4 @@
-package com.neverdiesoul.data.repository.api
+package com.neverdiesoul.data.api
 
 object ApiClient {
     /**

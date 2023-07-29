@@ -1,22 +1,21 @@
 package com.neverdiesoul.data.repository.remote
 
 import android.util.Log
-import com.neverdiesoul.data.repository.api.ApiClient
-import com.neverdiesoul.data.repository.api.ApiInterface
-import com.neverdiesoul.data.repository.api.CoinMarketCode
+import com.neverdiesoul.data.api.ApiClient
+import com.neverdiesoul.data.api.ApiInterface
+import com.neverdiesoul.data.mapper.Mapper.toDomain
 import com.neverdiesoul.data.repository.remote.websocket.WebSocketConstants
+import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
-import java.lang.Exception
 import javax.inject.Inject
 
 class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: OkHttpClient, private val retrofit: Retrofit) : StockRemoteDataSource {
@@ -24,12 +23,16 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
     private val retrofitService by lazy { retrofit.create(ApiInterface::class.java) }
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    override fun getCoinMarketCodeAll() {
-        coroutineScope.launch {
+    override fun getCoinMarketCodeAll(): Flow<List<CoinMarketCode>> {
+        return flow {
             try {
                 val response = retrofitService.getCoinMarketCodeAll()
                 if (response.isSuccessful) {
-                    response.body()?.forEach { Log.d(WebSocketConstants.TAG,"코인 마켓 코드 $it") }
+                    response.body()?.let {
+                        //Log.d(WebSocketConstants.TAG,"코인 마켓 코드 ${it.size}개")
+                        it.forEach { Log.d(WebSocketConstants.TAG,"코인 마켓 코드 $it") }
+                        emit(it.toDomain())
+                    }
                 } else {
                     Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
                 }
