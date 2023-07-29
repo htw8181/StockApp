@@ -3,22 +3,26 @@ package com.neverdiesoul.stockapp.view
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.view.composable.navigation.Intro
+import com.neverdiesoul.stockapp.view.composable.navigation.Main
+import com.neverdiesoul.stockapp.view.composable.navigation.NavRoutes
+import com.neverdiesoul.stockapp.viewmodel.IntroViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -28,27 +32,34 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    MainScreen()
                 }
             }
         }
 
-        viewModel.getRealTimeStock()
+
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+private fun MainScreen(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = NavRoutes.Intro.route) {
+        composable(NavRoutes.Intro.route) {
+            Intro(navController, hiltViewModel<IntroViewModel>())
+        }
+
+        composable(NavRoutes.Main.route) {
+            Main(navController, hiltViewModel<MainViewModel>())
+        }
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview() {
+private fun MainActivityPreview() {
     StockAppTheme {
-        Greeting("Android")
+        MainScreen()
     }
 }

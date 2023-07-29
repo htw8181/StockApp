@@ -53,5 +53,9 @@
   * [참고 URL3](https://velog.io/@jeongminji4490/Retrofit-Call-vs-Response-and-Kotlin-Result)
   * [참고 URL4](https://codechacha.com/ko/android-coroutine-retrofit/)
   * [참고 URL5](https://seokzoo.tistory.com/4)
+- 2023년 7월 29일
+  1. jetpack compose navigation 적용(navigation 각 화면 composable UI는 추후 개발 예정)
+  2. jetpack compose hilt viewmodel 적용(hiltViewModel) - navigation 각 화면마다 각자의 ViewModel을 가진다.
+  * [참고 URL](https://velog.io/@wlsrhkd4023/Compose-hiltViewModel%EA%B3%BC-viewModel-%EC%B0%A8%EC%9D%B4)
 # 비고 & 특이사항
   * 앱 시작시 마켓코드를 받아 RoomDB에 저장해 둘 것!!

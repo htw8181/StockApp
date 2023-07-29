@@ -29,7 +29,7 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
             try {
                 val response = retrofitService.getCoinMarketCodeAll()
                 if (response.isSuccessful) {
-                    response.body()?.forEach { Log.d("코인 마켓 코드",it.toString()) }
+                    response.body()?.forEach { Log.d(WebSocketConstants.TAG,"코인 마켓 코드 $it") }
                 } else {
                     Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
                 }

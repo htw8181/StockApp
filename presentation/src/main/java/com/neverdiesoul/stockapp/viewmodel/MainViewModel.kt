@@ -18,15 +18,12 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    private val getRealTimeStockUseCase: GetRealTimeStockUseCase,
-    private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase) : ViewModel() {
     init {
         getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
     }
 
     fun getRealTimeStock() {
-        getCoinMarketCodeAllUseCase()
         getRealTimeStockUseCase()
     }
     private class RealTimeStockListener : WebSocketListener() {
