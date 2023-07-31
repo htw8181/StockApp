@@ -17,7 +17,7 @@ import retrofit2.Retrofit
 import javax.inject.Inject
 
 class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: OkHttpClient, private val retrofit: Retrofit) : StockRemoteDataSource {
-    private val TAG = this::class.simpleName
+    private val tag = this::class.simpleName
     private lateinit var socket: WebSocket
     private val retrofitService by lazy { retrofit.create(ApiInterface::class.java) }
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -29,20 +29,20 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
                 if (response.isSuccessful) {
                     response.body()?.let {
                         //Log.d(TAG,"코인 마켓 코드 ${it.size}개")
-                        it.forEach { responseCoinMarketCode ->  Log.d(TAG,"코인 마켓 코드 $responseCoinMarketCode") }
+                        it.forEach { responseCoinMarketCode ->  Log.d(tag,"코인 마켓 코드 $responseCoinMarketCode") }
                         emit(it)
                     }
                 } else {
-                    Log.d(TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
+                    Log.d(tag, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "코인 마켓 코드 수신 에러 ${e.message}")
+                Log.d(tag, "코인 마켓 코드 수신 에러 ${e.message}")
             }
         }
     }
 
     override fun getRealTimeStock(webSocketListener: WebSocketListener) {
-        Log.d(TAG, "통신 시작")
+        Log.d(tag, "통신 시작")
         coroutineScope.launch {
 
             val request = Request.Builder()

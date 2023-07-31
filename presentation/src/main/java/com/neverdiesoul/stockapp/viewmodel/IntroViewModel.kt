@@ -13,25 +13,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
-    val TAG = this::class.simpleName
+    private val tag = this::class.simpleName
     fun getCoinMarketCodeAll() {
         viewModelScope.launch {
             getCoinMarketCodeAllUseCase()
-                .onStart { Log.d(TAG,"onStart")  }
-                .onCompletion { Log.d(TAG,"onCompletion") }
-                .catch { Log.d(TAG,"Error!! $it") }
+                .onStart { Log.d(tag,"onStart")  }
+                .onCompletion { Log.d(tag,"onCompletion") }
+                .catch { Log.d(tag,"Error!! $it") }
                 .collect {
                     when(it) {
                         true-> {
-                            Log.d(TAG,"마켓 코드 DB 저장 완료")
+                            Log.d(tag,"마켓 코드 DB 저장 완료")
                         }
                         false -> {
-                            Log.d(TAG,"마켓 코드 DB 저장 실패")
+                            Log.d(tag,"마켓 코드 DB 저장 실패")
                         }
                     }
-
                 }
-
         }
     }
 }

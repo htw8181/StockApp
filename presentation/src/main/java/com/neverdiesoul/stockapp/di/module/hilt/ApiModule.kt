@@ -1,10 +1,8 @@
 package com.neverdiesoul.stockapp.di.module.hilt
 
-import com.neverdiesoul.data.repository.StockRepositoryImpl
 import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.repository.remote.StockRemoteDataSource
 import com.neverdiesoul.data.repository.remote.StockRemoteDataSourceImpl
-import com.neverdiesoul.domain.repository.StockRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

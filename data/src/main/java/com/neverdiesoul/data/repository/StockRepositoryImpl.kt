@@ -22,20 +22,20 @@ class StockRepositoryImpl @Inject constructor(
     private val stockRemoteDataSource: StockRemoteDataSource,
     private val stockLocalDataSource: StockLocalDataSource
     ) : StockRepository {
-    val TAG = this::class.simpleName
+    val tag = this::class.simpleName
     override fun getCoinMarketCodeAll(): Flow<Boolean> {
         return flow {
             stockRemoteDataSource.getCoinMarketCodeAll()
-                .onStart { Log.d(TAG,"onStart")  }
-                .onCompletion { Log.d(TAG,"onCompletion") }
+                .onStart { Log.d(tag,"onStart")  }
+                .onCompletion { Log.d(tag,"onCompletion") }
                 .catch {
-                    Log.d(TAG,"Error!! $it")
+                    Log.d(tag,"Error!! $it")
                     emit(false)
                 }
                 .collect { responseCoinMarketCodes ->
-                    Log.d(TAG,"코인 마켓 코드 ${responseCoinMarketCodes.size}개")
+                    Log.d(tag,"코인 마켓 코드 ${responseCoinMarketCodes.size}개")
                     responseCoinMarketCodes.mapIndexed { index, responseCoinMarketCode ->
-                        Log.d(TAG,"코인 마켓 코드 $responseCoinMarketCode")
+                        Log.d(tag,"코인 마켓 코드 $responseCoinMarketCode")
                         responseCoinMarketCode.toDBEntity(index+1)
                     }.let { coinMarketCodeEntities ->
                         try {
@@ -43,8 +43,8 @@ class StockRepositoryImpl @Inject constructor(
                             val channels = Channel<Boolean>()
                             CoroutineScope(Dispatchers.IO).launch {
                                 val resultCount = stockLocalDataSource.insertCoinMarketCodeAll(coinMarketCodeEntities)
-                                Log.d(TAG,"코인 마켓 코드 DB 저장 카운트 ${resultCount.size}")
-                                Log.d(TAG,"코인 마켓 코드 emit")
+                                Log.d(tag,"코인 마켓 코드 DB 저장 카운트 ${resultCount.size}")
+                                Log.d(tag,"코인 마켓 코드 emit")
                                 if (resultCount.size.toLong() == coinMarketCodeEntities.size.toLong()) {
                                     coroutineScope {
                                         channels.send(true)
@@ -60,7 +60,7 @@ class StockRepositoryImpl @Inject constructor(
                                 emit(it)
                             }
                         } catch (e: Exception) {
-                            Log.d(TAG,"Collect Error!! ${e.message}")
+                            Log.d(tag,"Collect Error!! ${e.message}")
                             emit(false)
                         }
                     }

@@ -6,8 +6,6 @@ import com.google.gson.Gson
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
 import com.neverdiesoul.data.repository.remote.websocket.UpbitType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitWebSocketResponseData
-import com.neverdiesoul.data.repository.remote.websocket.WebSocketConstants
-import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllUseCase
 import com.neverdiesoul.domain.usecase.GetRealTimeStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import okhttp3.Response
@@ -19,6 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase) : ViewModel() {
+    private val tag = this::class.simpleName
     init {
         getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
     }
@@ -27,41 +26,42 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
         getRealTimeStockUseCase()
     }
     private class RealTimeStockListener : WebSocketListener() {
+        private val tag = this::class.simpleName
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosed(webSocket, code, reason)
-            Log.d(WebSocketConstants.TAG,"onClosed")
+            Log.d(tag,"onClosed")
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosing(webSocket, code, reason)
-            Log.d(WebSocketConstants.TAG,"onClosing")
+            Log.d(tag,"onClosing")
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
-            Log.d(WebSocketConstants.TAG,"onFailure")
+            Log.d(tag,"onFailure")
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             super.onMessage(webSocket, text)
-            Log.d(WebSocketConstants.TAG,"수신 text=> $text")
+            Log.d(tag,"수신 text=> $text")
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             super.onMessage(webSocket, bytes)
-            Log.d(WebSocketConstants.TAG,"수신 bytes=> ${bytes.toString()}")
+            Log.d(tag,"수신 bytes=> ${bytes.toString()}")
             try {
                 val res = Gson().fromJson(bytes.string(Charsets.UTF_8),UpbitWebSocketResponseData::class.java)
-                Log.d(WebSocketConstants.TAG,"수신 bytes=> $res")
+                Log.d(tag,"수신 bytes=> $res")
             } catch (e: Exception) {
-                Log.d(WebSocketConstants.TAG,e.message.toString())
+                Log.d(tag,e.message.toString())
             }
         }
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
             val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType("ticker", listOf("KRW-BTC"))))
-            Log.d(WebSocketConstants.TAG,"onOpen : $sendData")
+            Log.d(tag,"onOpen : $sendData")
             //webSocket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
             webSocket.send(sendData)
         }
@@ -71,6 +71,6 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
         super.onCleared()
 
         getRealTimeStockUseCase.closeRealTimeStock()
-        Log.d(WebSocketConstants.TAG,"통신 닫힘")
+        Log.d(tag,"통신 닫힘")
     }
 }
