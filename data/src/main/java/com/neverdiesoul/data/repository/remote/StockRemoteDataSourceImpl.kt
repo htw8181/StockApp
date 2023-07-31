@@ -3,9 +3,7 @@ package com.neverdiesoul.data.repository.remote
 import android.util.Log
 import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.api.ApiInterface
-import com.neverdiesoul.data.mapper.Mapper.toDomain
-import com.neverdiesoul.data.repository.remote.websocket.WebSocketConstants
-import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.data.model.ResponseCoinMarketCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,31 +17,32 @@ import retrofit2.Retrofit
 import javax.inject.Inject
 
 class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: OkHttpClient, private val retrofit: Retrofit) : StockRemoteDataSource {
+    private val TAG = this::class.simpleName
     private lateinit var socket: WebSocket
     private val retrofitService by lazy { retrofit.create(ApiInterface::class.java) }
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    override fun getCoinMarketCodeAll(): Flow<List<CoinMarketCode>> {
+    override fun getCoinMarketCodeAll(): Flow<List<ResponseCoinMarketCode>> {
         return flow {
             try {
                 val response = retrofitService.getCoinMarketCodeAll()
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        //Log.d(WebSocketConstants.TAG,"코인 마켓 코드 ${it.size}개")
-                        it.forEach { Log.d(WebSocketConstants.TAG,"코인 마켓 코드 $it") }
-                        emit(it.toDomain())
+                        //Log.d(TAG,"코인 마켓 코드 ${it.size}개")
+                        it.forEach { responseCoinMarketCode ->  Log.d(TAG,"코인 마켓 코드 $responseCoinMarketCode") }
+                        emit(it)
                     }
                 } else {
-                    Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
+                    Log.d(TAG, "코인 마켓 코드 수신 에러 ${response.code()} : ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.d(WebSocketConstants.TAG, "코인 마켓 코드 수신 에러 ${e.message}")
+                Log.d(TAG, "코인 마켓 코드 수신 에러 ${e.message}")
             }
         }
     }
 
     override fun getRealTimeStock(webSocketListener: WebSocketListener) {
-        Log.d(WebSocketConstants.TAG, "통신 시작")
+        Log.d(TAG, "통신 시작")
         coroutineScope.launch {
 
             val request = Request.Builder()

@@ -24,7 +24,6 @@ object ApiModuleProvides {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-
         return OkHttpClient().newBuilder()
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
@@ -47,9 +46,6 @@ object ApiModuleProvides {
 @InstallIn(ViewModelComponent::class)
 @Module
 abstract class ApiModuleBinds {
-    @Binds
-    @ViewModelScoped
-    abstract fun bindStockRepository(impl: StockRepositoryImpl): StockRepository
     @Binds
     @ViewModelScoped
     abstract fun bindStockRemoteDataSource(impl: StockRemoteDataSourceImpl): StockRemoteDataSource

@@ -3,7 +3,6 @@ package com.neverdiesoul.stockapp.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neverdiesoul.data.repository.remote.websocket.WebSocketConstants
 import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -14,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
-    val TAG = IntroViewModel::class.simpleName
+    val TAG = this::class.simpleName
     fun getCoinMarketCodeAll() {
         viewModelScope.launch {
             getCoinMarketCodeAllUseCase()
@@ -22,8 +21,15 @@ class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase
                 .onCompletion { Log.d(TAG,"onCompletion") }
                 .catch { Log.d(TAG,"Error!! $it") }
                 .collect {
-                    //Log.d(TAG,"코인 마켓 코드 ${it.size}개")
-                    it.forEach { data -> Log.d(TAG,"코인 마켓 코드 $data") }
+                    when(it) {
+                        true-> {
+                            Log.d(TAG,"마켓 코드 DB 저장 완료")
+                        }
+                        false -> {
+                            Log.d(TAG,"마켓 코드 DB 저장 실패")
+                        }
+                    }
+
                 }
 
         }

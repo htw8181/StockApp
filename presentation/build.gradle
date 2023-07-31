@@ -91,4 +91,7 @@ dependencies {
 
     // Compose ViewModel dependencies
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$compose_viewmodel_version")
+
+    // RoomDB dependencies
+    implementation "androidx.room:room-runtime:$room_version"
 }

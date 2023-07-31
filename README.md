@@ -61,5 +61,7 @@
   1. Retrofit API로 가상화폐 마켓코드를 얻어온 후 회신 데이터를 Flow Stream으로 Emit(배출)
   2. Data와 Domain Layer는 서로 다른 모델을 사용하도록 함. Data 모델은 Mapper를 통해 Domain 모델로 변환됨
      (Data 모델을 Domain Layer에서 직접 쓸경우 빌드 에러가 난다. Domain은 Data 모듈을 dependency로 가지고 있지 않기 때문에..)
+- 2023년 7월 31일
+  1. 앱 시작시 Intro 화면에서 가상화폐 마켓코드를 서버로부터 받아서(Retrofit 통신) RoomDB에 저장하도록 로직 적용
 # 비고 & 특이사항
-  * 앱 시작시 마켓코드를 받아 RoomDB에 저장해 둘 것!!
+  * 앱 시작시 마켓코드를 받아 RoomDB에 저장 성공시 메인화면으로 진입할 것~

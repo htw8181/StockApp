@@ -8,6 +8,7 @@ buildscript {
         navigation_compose_version = '2.5.3'
         hilt_navigation_compose_version = '1.0.0'
         compose_viewmodel_version = '2.4.1'
+        room_version = "2.4.2"
     }
 
     repositories {

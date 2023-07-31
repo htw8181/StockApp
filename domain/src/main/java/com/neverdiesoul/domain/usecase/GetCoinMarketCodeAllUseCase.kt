@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetCoinMarketCodeAllUseCase @Inject constructor(private val repository: StockRepository) {
-    operator fun invoke(): Flow<List<CoinMarketCode>> = repository.getCoinMarketCodeAll()
+    operator fun invoke(): Flow<Boolean> = repository.getCoinMarketCodeAll()
 }
