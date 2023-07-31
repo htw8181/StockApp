@@ -63,5 +63,8 @@
      (Data 모델을 Domain Layer에서 직접 쓸경우 빌드 에러가 난다. Domain은 Data 모듈을 dependency로 가지고 있지 않기 때문에..)
 - 2023년 7월 31일
   1. 앱 시작시 Intro 화면에서 가상화폐 마켓코드를 서버로부터 받아서(Retrofit 통신) RoomDB에 저장하도록 로직 적용
+- 2023년 8월 1일
+  1. 앱 시작시 마켓코드를 받아 RoomDB에 저장 성공시 메인화면으로 진입하도록 로직 적용
+  2. Compose LiveData dependency 적용
 # 비고 & 특이사항
-  * 앱 시작시 마켓코드를 받아 RoomDB에 저장 성공시 메인화면으로 진입할 것~
+  * 

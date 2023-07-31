@@ -71,6 +71,6 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
         super.onCleared()
 
         getRealTimeStockUseCase.closeRealTimeStock()
-        Log.d(tag,"통신 닫힘")
+        Log.d(tag,"RealTimeStock 통신 닫힘")
     }
 }

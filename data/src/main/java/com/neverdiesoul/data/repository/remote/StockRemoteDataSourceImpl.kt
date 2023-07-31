@@ -42,7 +42,7 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
     }
 
     override fun getRealTimeStock(webSocketListener: WebSocketListener) {
-        Log.d(tag, "통신 시작")
+        Log.d(tag, "RealTimeStock 통신 시작")
         coroutineScope.launch {
 
             val request = Request.Builder()

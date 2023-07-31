@@ -1,6 +1,8 @@
 package com.neverdiesoul.stockapp.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllUseCase
@@ -14,6 +16,10 @@ import javax.inject.Inject
 @HiltViewModel
 class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
     private val tag = this::class.simpleName
+
+    private var _stateToGoMain: MutableLiveData<Boolean> = MutableLiveData(false)
+    val stateToGoMain: LiveData<Boolean> = _stateToGoMain
+
     fun getCoinMarketCodeAll() {
         viewModelScope.launch {
             getCoinMarketCodeAllUseCase()
@@ -29,6 +35,7 @@ class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase
                             Log.d(tag,"마켓 코드 DB 저장 실패")
                         }
                     }
+                    _stateToGoMain.value = it
                 }
         }
     }
