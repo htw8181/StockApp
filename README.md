@@ -66,5 +66,7 @@
 - 2023년 8월 1일
   1. 앱 시작시 마켓코드를 받아 RoomDB에 저장 성공시 메인화면으로 진입하도록 로직 적용
   2. Compose LiveData dependency 적용
+- 2023년 8월 2일
+  1. 메인화면 Scaffold,TopAppBar,NavigationBar 적용
 # 비고 & 특이사항
-  * 
+  * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
