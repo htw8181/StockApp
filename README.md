@@ -68,5 +68,7 @@
   2. Compose LiveData dependency 적용
 - 2023년 8월 2일
   1. 메인화면 Scaffold,TopAppBar,NavigationBar 적용
+  2. 업비트 웹화면 캡쳐(윈도우+shift+s)하여 화면 구성 및 컬러 분석(캡쳐 파일을 그림판으로 열어 스포이트로 색상값 추출)
+  3. 메인 화면 KRW,BTC,USDT 탭버튼 구성
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리

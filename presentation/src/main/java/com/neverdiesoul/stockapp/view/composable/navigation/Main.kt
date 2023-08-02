@@ -1,8 +1,14 @@
 package com.neverdiesoul.stockapp.view.composable.navigation
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -10,12 +16,21 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +63,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
             BottomNavigationBar(rememberNavController())
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .fillMaxSize()
             .padding(
                 top = paddingValues.calculateTopPadding(),
@@ -57,9 +72,38 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
         {
             /**
              * TODO
-             * 1. KRW,BTC,USDT 탭버튼 구성
-             * 2. 실시간 코인 데이터를 LazyColumn 으로 구성
+             * 1. 실시간 코인 데이터를 LazyColumn 으로 구성
              */
+            Spacer(modifier = Modifier
+                .background(color = Color(red = 9, green = 54, blue = 135))
+                .height(3.dp)
+                .fillMaxWidth())
+
+            Row(modifier = Modifier.padding(10.dp)) {
+                var selectedTabIndex by remember { mutableStateOf(0) }
+
+                val tabTitles = listOf("KRW","BTC","USDT")
+                val selectedColor = Color(red = 9, green = 54, blue = 135)
+                TabRow(selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .border(width = 1.dp, color = Color.Gray, shape = RectangleShape),
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
+                    tabs = {
+                        tabTitles.forEachIndexed { tabIndex, tabTitle ->
+                            Tab(modifier = Modifier.border(width = 2.dp, color = if (tabIndex == selectedTabIndex) selectedColor else Color.Transparent, shape = RectangleShape).drawBehind { drawLine(Color.Gray, Offset(size.width, 0f), Offset(size.width, size.height), 1.dp.toPx()) },
+                                selectedContentColor = selectedColor,
+                                unselectedContentColor = Color.Gray,
+                                selected = tabIndex == selectedTabIndex,
+                                onClick = { selectedTabIndex = tabIndex },
+                                content = { Text(text = tabTitle, modifier = Modifier.padding(10.dp)) })
+                        }
+                    },
+                    indicator = {}
+                )
+            }
+
         }
     }
     Log.d("1111","22222")

@@ -9,8 +9,8 @@ sealed class BottomNavBarRoutes(val route: String) {
 
 object BottomNavigationBar {
     val BarItems = listOf(
-        BarItem("native" , R.drawable.baseline_android_24, BottomNavBarRoutes.NativeScreen.route),
-        BarItem("webview", R.drawable.baseline_web_24, BottomNavBarRoutes.WebviewScreen.route)
+        BarItem("Native" , R.drawable.baseline_android_24, BottomNavBarRoutes.NativeScreen.route),
+        BarItem("Webview", R.drawable.baseline_web_24, BottomNavBarRoutes.WebviewScreen.route)
     )
 }
 
