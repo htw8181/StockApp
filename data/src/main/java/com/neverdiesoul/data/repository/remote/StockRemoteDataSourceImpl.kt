@@ -22,10 +22,10 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
     private val retrofitService by lazy { retrofit.create(ApiInterface::class.java) }
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    override fun getCoinMarketCodeAll(): Flow<List<ResponseCoinMarketCode>> {
+    override fun getCoinMarketCodeAllFromRemote(): Flow<List<ResponseCoinMarketCode>> {
         return flow {
             try {
-                val response = retrofitService.getCoinMarketCodeAll()
+                val response = retrofitService.getCoinMarketCodeAllFromRemote()
                 if (response.isSuccessful) {
                     response.body()?.let {
                         //Log.d(TAG,"코인 마켓 코드 ${it.size}개")

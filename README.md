@@ -70,5 +70,9 @@
   1. 메인화면 Scaffold,TopAppBar,NavigationBar 적용
   2. 업비트 웹화면 캡쳐(윈도우+shift+s)하여 화면 구성 및 컬러 분석(캡쳐 파일을 그림판으로 열어 스포이트로 색상값 추출)
   3. 메인 화면 KRW,BTC,USDT 탭버튼 구성
+- 2023년 8월 3일
+  1. RoomDB Insert 수정(@Insert DAO에서 다수 데이터를 insert 해야할때에는 param을 list가 아닌 vararg로 받아야 한다. 배열을 인자로 사용할시에는 *배열로 spread화 시켜서 insert함수에 전달한다)
+  2. RoomDB Insert 가 inMemoryDataBase에서는 오동작 하는 것 같아서, 일반 DataBaseBuilder로 DB 인스턴스 생성하도록 수정
+  3. 메인 화면 진입시 DB에 저장되어 있던 마켓코드 불러오는 로직 적용. 이에 따라 서버에서 수신 받을시에는 GetCoinMarketCodeAllFromRemoteUseCase, DB에서 불러올시에는 GetCoinMarketCodeAllFromLocalUseCase 처리하도록 구분시켰음.
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리

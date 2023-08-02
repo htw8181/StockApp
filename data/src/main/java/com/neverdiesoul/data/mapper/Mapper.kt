@@ -1,12 +1,13 @@
 package com.neverdiesoul.data.mapper
 
-import com.neverdiesoul.data.model.ResponseCoinMarketCode
+import com.neverdiesoul.data.db.entity.CoinMarketCodeEntity
 
+typealias CoinMarketCodeToDomain = com.neverdiesoul.domain.model.CoinMarketCode
 object Mapper {
 
-    fun List<ResponseCoinMarketCode>.toDomain(): List<com.neverdiesoul.domain.model.CoinMarketCode> {
+    fun List<CoinMarketCodeEntity>.toDomain(): List<CoinMarketCodeToDomain> {
         return this.map {
-            com.neverdiesoul.domain.model.CoinMarketCode(it.market,it.koreanName,it.englishName)
+            CoinMarketCodeToDomain(it.market,it.koreanName,it.englishName)
         }
     }
 }

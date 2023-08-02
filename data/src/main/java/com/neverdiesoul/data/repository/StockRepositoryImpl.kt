@@ -3,6 +3,7 @@ package com.neverdiesoul.data.repository
 import android.util.Log
 import com.neverdiesoul.data.repository.local.StockLocalDataSource
 import com.neverdiesoul.data.repository.remote.StockRemoteDataSource
+import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.repository.StockRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,9 +24,9 @@ class StockRepositoryImpl @Inject constructor(
     private val stockLocalDataSource: StockLocalDataSource
     ) : StockRepository {
     val tag = this::class.simpleName
-    override fun getCoinMarketCodeAll(): Flow<Boolean> {
+    override fun getCoinMarketCodeAllFromRemote(): Flow<Boolean> {
         return flow {
-            stockRemoteDataSource.getCoinMarketCodeAll()
+            stockRemoteDataSource.getCoinMarketCodeAllFromRemote()
                 .onStart { Log.d(tag,"onStart")  }
                 .onCompletion { Log.d(tag,"onCompletion") }
                 .catch {
@@ -75,4 +76,6 @@ class StockRepositoryImpl @Inject constructor(
     override fun closeRealTimeStock() {
         stockRemoteDataSource.closeRealTimeStock()
     }
+
+    override fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>> = stockLocalDataSource.getCoinMarketCodeAllFromLocal()
 }

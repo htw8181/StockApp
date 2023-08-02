@@ -26,7 +26,7 @@ object DataModuleProvides {
      */
     @Singleton
     @Provides
-    fun provideRoom(@ApplicationContext context: Context): StockDataBase = Room.inMemoryDatabaseBuilder(context,StockDataBase::class.java).build()
+    fun provideRoom(@ApplicationContext context: Context): StockDataBase = Room.databaseBuilder(context,StockDataBase::class.java,"StockDataBase").build()
 
     @Singleton
     @Provides

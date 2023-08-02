@@ -1,13 +1,22 @@
 package com.neverdiesoul.stockapp.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
 import com.neverdiesoul.data.repository.remote.websocket.UpbitType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitWebSocketResponseData
+import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.domain.usecase.GetRealTimeStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -16,8 +25,12 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase, private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase) : ViewModel() {
     private val tag = this::class.simpleName
+
+    private var _coinMarketCodes: MutableLiveData<List<CoinMarketCode>> = MutableLiveData(mutableListOf())
+    val coinMarketCodes: LiveData<List<CoinMarketCode>> = _coinMarketCodes
+
     init {
         getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
     }
@@ -72,5 +85,17 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
 
         getRealTimeStockUseCase.closeRealTimeStock()
         Log.d(tag,"RealTimeStock 통신 닫힘")
+    }
+
+    fun getCoinMarketCodeAllFromLocal() {
+        viewModelScope.launch {
+            getCoinMarketCodeAllFromLocalUseCase()
+                .onStart { Log.d(tag,"${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} onStart")  }
+                .onCompletion { Log.d(tag,"${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} onCompletion") }
+                .catch { Log.d(tag,"Error!! ${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} -> $it") }
+                .collect {
+                    _coinMarketCodes.value = it
+                }
+        }
     }
 }

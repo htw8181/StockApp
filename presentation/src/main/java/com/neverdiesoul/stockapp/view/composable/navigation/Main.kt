@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,9 +36,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
@@ -92,7 +96,20 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                     contentColor = Color.Black,
                     tabs = {
                         tabTitles.forEachIndexed { tabIndex, tabTitle ->
-                            Tab(modifier = Modifier.border(width = 2.dp, color = if (tabIndex == selectedTabIndex) selectedColor else Color.Transparent, shape = RectangleShape).drawBehind { drawLine(Color.Gray, Offset(size.width, 0f), Offset(size.width, size.height), 1.dp.toPx()) },
+                            Tab(modifier = Modifier
+                                .border(
+                                    width = 2.dp,
+                                    color = if (tabIndex == selectedTabIndex) selectedColor else Color.Transparent,
+                                    shape = RectangleShape
+                                )
+                                .drawBehind {
+                                    drawLine(
+                                        Color.Gray,
+                                        Offset(size.width, 0f),
+                                        Offset(size.width, size.height),
+                                        1.dp.toPx()
+                                    )
+                                },
                                 selectedContentColor = selectedColor,
                                 unselectedContentColor = Color.Gray,
                                 selected = tabIndex == selectedTabIndex,
@@ -104,10 +121,15 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 )
             }
 
+            val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
+            coinMarketCodes.forEach {
+                Log.d(GetCoinMarketCodeAllFromLocalUseCase::class.simpleName,it.toString())
+            }
         }
     }
     Log.d("1111","22222")
     LaunchedEffect(Unit) {
+        viewModel?.getCoinMarketCodeAllFromLocal()
         viewModel?.getRealTimeStock()
     }
 }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import okhttp3.WebSocketListener
 
 interface StockRemoteDataSource {
-    fun getCoinMarketCodeAll(): Flow<List<ResponseCoinMarketCode>>
+    fun getCoinMarketCodeAllFromRemote(): Flow<List<ResponseCoinMarketCode>>
     fun getRealTimeStock(webSocketListener: WebSocketListener)
 
     fun closeRealTimeStock()

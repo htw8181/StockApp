@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllUseCase
+import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromRemoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
@@ -14,15 +14,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllUseCase: GetCoinMarketCodeAllUseCase) : ViewModel() {
+class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllFromRemoteUseCase: GetCoinMarketCodeAllFromRemoteUseCase) : ViewModel() {
     private val tag = this::class.simpleName
 
     private var _stateToGoMain: MutableLiveData<Boolean> = MutableLiveData(false)
     val stateToGoMain: LiveData<Boolean> = _stateToGoMain
 
-    fun getCoinMarketCodeAll() {
+    fun getCoinMarketCodeAllFromRemote() {
         viewModelScope.launch {
-            getCoinMarketCodeAllUseCase()
+            getCoinMarketCodeAllFromRemoteUseCase()
                 .onStart { Log.d(tag,"onStart")  }
                 .onCompletion { Log.d(tag,"onCompletion") }
                 .catch { Log.d(tag,"Error!! $it") }
