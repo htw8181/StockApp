@@ -77,4 +77,8 @@
   4. Room DB 처리시 Flow 로직 수정(DAO 함수에 suspend 적용, Channel 제거)
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
-  * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 - [참고 URL](https://hungseong.tistory.com/33)
+  * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 
+  - [참고 URL](https://hungseong.tistory.com/33)
+  - 이 건은 취소 한다. DAO 함수(Select 쿼리문) 반환형을 Flow로 적용하면, DB데이터가 바뀔때마다 자동으로 호출되는데,
+    현재 앱에서는 굳이 필요할 것 같지 않아 추후, 필요시에 검토해서 적용하려 함. 
+  - 반환형을 Flow로 적용하니까, collect 후에 onCompletion 메소드가 호출되지 않는게 찜찜하다..
