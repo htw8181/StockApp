@@ -5,7 +5,7 @@ import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.flow.Flow
 
 interface StockLocalDataSource {
-    fun insertCoinMarketCodeAll(list: List<CoinMarketCodeEntity>): LongArray
+    fun insertCoinMarketCodeAll(list: List<CoinMarketCodeEntity>): Flow<LongArray>
 
     fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>>
 }

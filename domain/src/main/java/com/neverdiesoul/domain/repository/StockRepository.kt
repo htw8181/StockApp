@@ -8,6 +8,5 @@ interface StockRepository {
     fun getCoinMarketCodeAllFromRemote(): Flow<Boolean>
     fun getRealTimeStock(webSocketListener: WebSocketListener)
     fun closeRealTimeStock()
-
     fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>>
 }

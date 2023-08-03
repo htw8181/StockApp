@@ -21,18 +21,19 @@ class IntroViewModel @Inject constructor(private val getCoinMarketCodeAllFromRem
     val stateToGoMain: LiveData<Boolean> = _stateToGoMain
 
     fun getCoinMarketCodeAllFromRemote() {
+        val funcName = object{}.javaClass.enclosingMethod.name
         viewModelScope.launch {
             getCoinMarketCodeAllFromRemoteUseCase()
-                .onStart { Log.d(tag,"onStart")  }
-                .onCompletion { Log.d(tag,"onCompletion") }
-                .catch { Log.d(tag,"Error!! $it") }
+                .onStart { Log.d(tag,"$funcName onStart")  }
+                .onCompletion { Log.d(tag,"$funcName onCompletion") }
+                .catch { Log.d(tag,"Error!! $funcName $it") }
                 .collect {
                     when(it) {
                         true-> {
-                            Log.d(tag,"마켓 코드 DB 저장 완료")
+                            Log.d(tag,"$funcName 마켓 코드 DB 저장 완료")
                         }
                         false -> {
-                            Log.d(tag,"마켓 코드 DB 저장 실패")
+                            Log.d(tag,"$funcName 마켓 코드 DB 저장 실패")
                         }
                     }
                     _stateToGoMain.value = it

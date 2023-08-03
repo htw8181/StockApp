@@ -88,12 +88,14 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
     }
 
     fun getCoinMarketCodeAllFromLocal() {
+        val funcName = object{}.javaClass.enclosingMethod.name
         viewModelScope.launch {
             getCoinMarketCodeAllFromLocalUseCase()
-                .onStart { Log.d(tag,"${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} onStart")  }
-                .onCompletion { Log.d(tag,"${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} onCompletion") }
-                .catch { Log.d(tag,"Error!! ${GetCoinMarketCodeAllFromLocalUseCase::class.simpleName} -> $it") }
+                .onStart { Log.d(tag,"$funcName onStart")  }
+                .onCompletion { Log.d(tag,"$funcName onCompletion") }
+                .catch { Log.d(tag,"Error!! $funcName -> $it") }
                 .collect {
+                    Log.d(tag,"$funcName collect size ${it.size}")
                     _coinMarketCodes.value = it
                 }
         }
