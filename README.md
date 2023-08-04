@@ -75,6 +75,8 @@
   2. RoomDB Insert 가 inMemoryDataBase에서는 오동작 하는 것 같아서, 일반 DataBaseBuilder로 DB 인스턴스 생성하도록 수정
   3. 메인 화면 진입시 DB에 저장되어 있던 마켓코드 불러오는 로직 적용. 이에 따라 서버에서 수신 받을시에는 GetCoinMarketCodeAllFromRemoteUseCase, DB에서 불러올시에는 GetCoinMarketCodeAllFromLocalUseCase 처리하도록 구분시켰음.
   4. Room DB 처리시 Flow 로직 수정(DAO 함수에 suspend 적용, Channel 제거)
+- 2023년 8월 5일
+  1. 메인화면 진입시 Room DB에서 얻어온 마켓코드들을 KRW/BTC/USDT 그룹으로 구분하여 저장
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 

@@ -24,12 +24,35 @@ import okio.ByteString
 import java.util.*
 import javax.inject.Inject
 
+enum class CoinGroup {
+    KRW,BTC,USDT
+}
+
+val NONE_STATE = -1
+val KRW_STATE = CoinGroup.KRW.ordinal
+val BTC_STATE = CoinGroup.BTC.ordinal
+val USDT_STATE = CoinGroup.USDT.ordinal
+
 @HiltViewModel
 class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase, private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase) : ViewModel() {
     private val tag = this::class.simpleName
 
     private var _coinMarketCodes: MutableLiveData<List<CoinMarketCode>> = MutableLiveData(mutableListOf())
     val coinMarketCodes: LiveData<List<CoinMarketCode>> = _coinMarketCodes
+
+    private var krwGroupMarketCodes = listOf<CoinMarketCode>()
+    private var btcGroupMarketCodes = listOf<CoinMarketCode>()
+    private var usdtGroupMarketCodes = listOf<CoinMarketCode>()
+
+    fun setKrwGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
+        this.krwGroupMarketCodes = marketCodes
+    }
+    fun setBtcGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
+        this.btcGroupMarketCodes = marketCodes
+    }
+    fun setUsdtGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
+        this.usdtGroupMarketCodes = marketCodes
+    }
 
     init {
         getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
@@ -88,7 +111,7 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
     }
 
     fun getCoinMarketCodeAllFromLocal() {
-        val funcName = object{}.javaClass.enclosingMethod.name
+        val funcName = object{}.javaClass.enclosingMethod?.name
         viewModelScope.launch {
             getCoinMarketCodeAllFromLocalUseCase()
                 .onStart { Log.d(tag,"$funcName onStart")  }

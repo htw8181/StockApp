@@ -40,14 +40,23 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.neverdiesoul.domain.model.CoinMarketCode
-import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.viewmodel.BTC_STATE
+import com.neverdiesoul.stockapp.viewmodel.CoinGroup
+import com.neverdiesoul.stockapp.viewmodel.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
+import com.neverdiesoul.stockapp.viewmodel.NONE_STATE
+import com.neverdiesoul.stockapp.viewmodel.USDT_STATE
+
+private const val TAG = "NavMainView"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Main(navController: NavHostController, viewModel: MainViewModel?) {
+    var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
+
+    val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
 
     Scaffold(
         topBar = {
@@ -83,9 +92,6 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 .fillMaxWidth())
 
             Row(modifier = Modifier.padding(10.dp)) {
-                var selectedTabIndex by remember { mutableStateOf(0) }
-
-                val tabTitles = listOf("KRW","BTC","USDT")
                 val selectedColor = Color(red = 9, green = 54, blue = 135)
                 TabRow(selectedTabIndex = selectedTabIndex,
                     modifier = Modifier
@@ -94,11 +100,11 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                     containerColor = Color.White,
                     contentColor = Color.Black,
                     tabs = {
-                        tabTitles.forEachIndexed { tabIndex, tabTitle ->
+                        enumValues<CoinGroup>().forEachIndexed { marketCodeIndex, marketCodeName ->
                             Tab(modifier = Modifier
                                 .border(
                                     width = 2.dp,
-                                    color = if (tabIndex == selectedTabIndex) selectedColor else Color.Transparent,
+                                    color = if (marketCodeIndex == selectedTabIndex) selectedColor else Color.Transparent,
                                     shape = RectangleShape
                                 )
                                 .drawBehind {
@@ -111,18 +117,13 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                                 },
                                 selectedContentColor = selectedColor,
                                 unselectedContentColor = Color.Gray,
-                                selected = tabIndex == selectedTabIndex,
-                                onClick = { selectedTabIndex = tabIndex },
-                                content = { Text(text = tabTitle, modifier = Modifier.padding(10.dp)) })
+                                selected = marketCodeIndex == selectedTabIndex,
+                                onClick = { selectedTabIndex = marketCodeIndex },
+                                content = { Text(text = marketCodeName.name, modifier = Modifier.padding(10.dp)) })
                         }
                     },
                     indicator = {}
                 )
-            }
-
-            val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
-            coinMarketCodes.forEach {
-                Log.d(GetCoinMarketCodeAllFromLocalUseCase::class.simpleName,it.toString())
             }
         }
     }
@@ -130,6 +131,53 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
     LaunchedEffect(Unit) {
         viewModel?.getCoinMarketCodeAllFromLocal()
         viewModel?.getRealTimeStock()
+    }
+
+    LaunchedEffect(coinMarketCodes) {
+        coinMarketCodes.let {
+            val marketCodesGroup = it.onEach {
+                //Log.d(TAG,it.toString())
+            }.groupBy { coinMarketCode ->
+                when {
+                    coinMarketCode.market.startsWith("KRW-") -> CoinGroup.KRW.name
+                    coinMarketCode.market.startsWith("BTC-") -> CoinGroup.BTC.name
+                    coinMarketCode.market.startsWith("USDT-") -> CoinGroup.USDT.name
+                    else -> "ETC"
+                }
+            }.onEach { entry ->
+                Log.d(TAG,"marketCodesGroupName is ${entry.key}")
+                entry.value.forEach { coinMarketCode ->
+                    Log.d(TAG,"${entry.key}'s member is ${coinMarketCode.market}")
+                }
+
+                with(entry) {
+                    when(key) {
+                        CoinGroup.KRW.name -> viewModel?.setKrwGroupMarketCodes(value)
+                        CoinGroup.BTC.name -> viewModel?.setBtcGroupMarketCodes(value)
+                        CoinGroup.USDT.name -> viewModel?.setUsdtGroupMarketCodes(value)
+                    }
+                }
+            }
+            Log.d(TAG,"marketCodesGroup size ${marketCodesGroup.size}")
+        }
+    }
+
+    LaunchedEffect(selectedTabIndex) {
+        Log.d(TAG,"current selectedTabIndex $selectedTabIndex")
+        if (selectedTabIndex >= 0) {
+            // TODO KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓으로 웹소켓 통신 하도록 로직 적용
+            when(selectedTabIndex) {
+                KRW_STATE -> {
+                    //viewModel?.getRealTimeStock()
+                }
+                BTC_STATE -> {
+                    //viewModel?.getRealTimeStock()
+                }
+                USDT_STATE -> {
+                    //viewModel?.getRealTimeStock()
+                }
+            }
+        }
     }
 }
 
