@@ -6,12 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
-import com.neverdiesoul.data.repository.remote.websocket.UpbitType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitWebSocketResponseData
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
-import com.neverdiesoul.domain.usecase.GetRealTimeStockUseCase
+import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
+import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
@@ -21,7 +20,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.*
 import javax.inject.Inject
 
 enum class CoinGroup {
@@ -34,12 +32,13 @@ val BTC_STATE = CoinGroup.BTC.ordinal
 val USDT_STATE = CoinGroup.USDT.ordinal
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: GetRealTimeStockUseCase, private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase, private val tryConnectionToGetRealTimeCoinDataUseCase: TryConnectionToGetRealTimeCoinDataUseCase, private  val requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase) : ViewModel() {
     private val tag = this::class.simpleName
 
     private var _coinMarketCodes: MutableLiveData<List<CoinMarketCode>> = MutableLiveData(mutableListOf())
     val coinMarketCodes: LiveData<List<CoinMarketCode>> = _coinMarketCodes
 
+    var webSocket: WebSocket? = null
     private var krwGroupMarketCodes = listOf<CoinMarketCode>()
     private var btcGroupMarketCodes = listOf<CoinMarketCode>()
     private var usdtGroupMarketCodes = listOf<CoinMarketCode>()
@@ -55,13 +54,14 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
     }
 
     init {
-        getRealTimeStockUseCase.setWebSocketListener(RealTimeStockListener())
+
     }
 
     fun getRealTimeStock() {
-        getRealTimeStockUseCase()
+        tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this,coinMarketCodes.value))
+        tryConnectionToGetRealTimeCoinDataUseCase()
     }
-    private class RealTimeStockListener : WebSocketListener() {
+    private class RealTimeStockListener(val viewModel: MainViewModel, val coinMarketCodes: List<CoinMarketCode>?) : WebSocketListener() {
         private val tag = this::class.simpleName
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosed(webSocket, code, reason)
@@ -75,7 +75,7 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
-            Log.d(tag,"onFailure")
+            Log.d(tag,"onFailure ${response?.code}")
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -85,7 +85,7 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             super.onMessage(webSocket, bytes)
-            Log.d(tag,"수신 bytes=> ${bytes.toString()}")
+            Log.d(tag,"수신 bytes=> $bytes")
             try {
                 val res = Gson().fromJson(bytes.string(Charsets.UTF_8),UpbitWebSocketResponseData::class.java)
                 Log.d(tag,"수신 bytes=> $res")
@@ -96,17 +96,28 @@ class MainViewModel @Inject constructor(private val getRealTimeStockUseCase: Get
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
-            val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType("ticker", listOf("KRW-BTC"))))
-            Log.d(tag,"onOpen : $sendData")
-            //webSocket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
-            webSocket.send(sendData)
+            viewModel.webSocket = webSocket
+        }
+    }
+
+    fun requestRealTimeCoinData(selectedTabIndex: Int) {
+        when(selectedTabIndex) {
+            KRW_STATE -> {
+                requestRealTimeCoinDataUseCase(krwGroupMarketCodes)
+            }
+            BTC_STATE -> {
+                requestRealTimeCoinDataUseCase(btcGroupMarketCodes)
+            }
+            USDT_STATE -> {
+                requestRealTimeCoinDataUseCase(usdtGroupMarketCodes)
+            }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
 
-        getRealTimeStockUseCase.closeRealTimeStock()
+        tryConnectionToGetRealTimeCoinDataUseCase.closeRealTimeStock()
         Log.d(tag,"RealTimeStock 통신 닫힘")
     }
 

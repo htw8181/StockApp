@@ -19,7 +19,7 @@ class StockRepositoryImpl @Inject constructor(
     ) : StockRepository {
     val tag = this::class.simpleName
     override fun getCoinMarketCodeAllFromRemote(): Flow<Boolean> {
-        val funcName = object{}.javaClass.enclosingMethod.name
+        val funcName = object{}.javaClass.enclosingMethod?.name
         return flow {
             stockRemoteDataSource.getCoinMarketCodeAllFromRemote()
                 .onStart { Log.d(tag,"$funcName onStart")  }
@@ -70,4 +70,8 @@ class StockRepositoryImpl @Inject constructor(
     }
 
     override fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>> = stockLocalDataSource.getCoinMarketCodeAllFromLocal()
+
+    override fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>) {
+        stockRemoteDataSource.requestRealTimeCoinData(marketCodes)
+    }
 }

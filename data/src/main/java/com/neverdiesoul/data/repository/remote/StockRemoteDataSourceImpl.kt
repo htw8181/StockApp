@@ -1,9 +1,13 @@
 package com.neverdiesoul.data.repository.remote
 
 import android.util.Log
+import com.google.gson.Gson
 import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.api.ApiInterface
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
+import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
+import com.neverdiesoul.data.repository.remote.websocket.UpbitType
+import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +18,7 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import retrofit2.Retrofit
+import java.util.*
 import javax.inject.Inject
 
 class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: OkHttpClient, private val retrofit: Retrofit) : StockRemoteDataSource {
@@ -56,8 +61,17 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
 
     override fun closeRealTimeStock() {
         coroutineScope.launch {
-            socket.cancel()
-            socket.close(ApiClient.WEB_SOCKET_NORMAL_CLOSURE_STATUS,"closeRealTimeStock!!")
+            socket.apply {
+                cancel()
+                close(ApiClient.WEB_SOCKET_NORMAL_CLOSURE_STATUS,"closeRealTimeStock!!")
+            }
         }
+    }
+
+    override fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>) {
+        val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType("ticker", marketCodes.map { it.market })))
+        Log.d(tag,"sendWebSocket : $sendData")
+        //socket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
+        socket.send(sendData)
     }
 }

@@ -42,12 +42,9 @@ import androidx.navigation.compose.rememberNavController
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
-import com.neverdiesoul.stockapp.viewmodel.BTC_STATE
 import com.neverdiesoul.stockapp.viewmodel.CoinGroup
-import com.neverdiesoul.stockapp.viewmodel.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import com.neverdiesoul.stockapp.viewmodel.NONE_STATE
-import com.neverdiesoul.stockapp.viewmodel.USDT_STATE
 
 private const val TAG = "NavMainView"
 
@@ -130,13 +127,13 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
     Log.d("1111","22222")
     LaunchedEffect(Unit) {
         viewModel?.getCoinMarketCodeAllFromLocal()
-        viewModel?.getRealTimeStock()
+//        viewModel?.getRealTimeStock()
     }
 
     LaunchedEffect(coinMarketCodes) {
         coinMarketCodes.let {
             val marketCodesGroup = it.onEach {
-                //Log.d(TAG,it.toString())
+                Log.d(TAG,it.toString())
             }.groupBy { coinMarketCode ->
                 when {
                     coinMarketCode.market.startsWith("KRW-") -> CoinGroup.KRW.name
@@ -159,24 +156,16 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 }
             }
             Log.d(TAG,"marketCodesGroup size ${marketCodesGroup.size}")
+
+            viewModel?.getRealTimeStock()
         }
     }
 
     LaunchedEffect(selectedTabIndex) {
         Log.d(TAG,"current selectedTabIndex $selectedTabIndex")
         if (selectedTabIndex >= 0) {
-            // TODO KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓으로 웹소켓 통신 하도록 로직 적용
-            when(selectedTabIndex) {
-                KRW_STATE -> {
-                    //viewModel?.getRealTimeStock()
-                }
-                BTC_STATE -> {
-                    //viewModel?.getRealTimeStock()
-                }
-                USDT_STATE -> {
-                    //viewModel?.getRealTimeStock()
-                }
-            }
+            // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 실시간 코인 정보 요청
+            viewModel?.requestRealTimeCoinData(selectedTabIndex)
         }
     }
 }

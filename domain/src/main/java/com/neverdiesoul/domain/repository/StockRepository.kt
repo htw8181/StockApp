@@ -9,4 +9,5 @@ interface StockRepository {
     fun getRealTimeStock(webSocketListener: WebSocketListener)
     fun closeRealTimeStock()
     fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>>
+    fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>)
 }

@@ -77,6 +77,7 @@
   4. Room DB 처리시 Flow 로직 수정(DAO 함수에 suspend 적용, Channel 제거)
 - 2023년 8월 5일
   1. 메인화면 진입시 Room DB에서 얻어온 마켓코드들을 KRW/BTC/USDT 그룹으로 구분하여 저장
+  2. 메인화면에서 KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓으로 웹소켓 통신 하도록 로직 적용
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 

@@ -1,12 +1,13 @@
 package com.neverdiesoul.data.repository.remote
 
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
+import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.flow.Flow
 import okhttp3.WebSocketListener
 
 interface StockRemoteDataSource {
     fun getCoinMarketCodeAllFromRemote(): Flow<List<ResponseCoinMarketCode>>
     fun getRealTimeStock(webSocketListener: WebSocketListener)
-
     fun closeRealTimeStock()
+    fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>)
 }
