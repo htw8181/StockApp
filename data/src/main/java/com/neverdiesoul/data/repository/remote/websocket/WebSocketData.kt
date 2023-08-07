@@ -1,6 +1,7 @@
 package com.neverdiesoul.data.repository.remote.websocket
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 
 object WebSocketConstants {
@@ -46,7 +47,7 @@ data class UpbitWebSocketResponseData (
     /**
      * 부호 없는 전일 대비 값
      */
-    @SerializedName("change_price"          ) val changePrice        : Double?     = null,
+    @SerializedName("change_price"          ) val changePrice        : BigDecimal?     = null,
     /**
      * 전일 대비 값
      */
@@ -78,7 +79,7 @@ data class UpbitWebSocketResponseData (
     /**
      * 24시간 누적 거래대금
      */
-    @SerializedName("acc_trade_price_24h"   ) val accTradePrice24h   : Double?  = null,
+    @SerializedName("acc_trade_price_24h"   ) val accTradePrice24h   : BigDecimal?  = null,
     /**
      * 최근 거래 일자(UTC) (yyyyMMdd)
      */

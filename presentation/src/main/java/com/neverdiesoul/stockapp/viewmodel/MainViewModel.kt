@@ -22,6 +22,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import java.math.BigDecimal
 import javax.inject.Inject
 
 enum class CoinGroup {
@@ -48,7 +49,11 @@ class MainViewModel @Inject constructor(
     private var _coinCurrentPrices: MutableLiveData<List<CoinCurrentPrice>> = MutableLiveData(mutableListOf())
     val coinCurrentPrices: LiveData<List<CoinCurrentPrice>> = _coinCurrentPrices
 
+    private var _realTimeCoinCurrentPrice: MutableLiveData<CoinCurrentPriceForMainView> = MutableLiveData(CoinCurrentPriceForMainView())
+    val realTimeCoinCurrentPrice: LiveData<CoinCurrentPriceForMainView> = _realTimeCoinCurrentPrice
+
     var webSocket: WebSocket? = null
+
     private var krwGroupMarketCodes = listOf<CoinMarketCode>()
     private var btcGroupMarketCodes = listOf<CoinMarketCode>()
     private var usdtGroupMarketCodes = listOf<CoinMarketCode>()
@@ -68,10 +73,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun getRealTimeStock() {
-        tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this,coinMarketCodes.value))
+        tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this))
         tryConnectionToGetRealTimeCoinDataUseCase()
     }
-    private class RealTimeStockListener(val viewModel: MainViewModel, val coinMarketCodes: List<CoinMarketCode>?) : WebSocketListener() {
+    private class RealTimeStockListener(val viewModel: MainViewModel) : WebSocketListener() {
         private val tag = this::class.simpleName
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosed(webSocket, code, reason)
@@ -99,6 +104,7 @@ class MainViewModel @Inject constructor(
             try {
                 val res = Gson().fromJson(bytes.string(Charsets.UTF_8),UpbitWebSocketResponseData::class.java)
                 Log.d(tag,"수신 bytes=> $res")
+                viewModel.sendRealTimeCoinCurrentPriceToMain(res)
             } catch (e: Exception) {
                 Log.d(tag,e.message.toString())
             }
@@ -110,19 +116,27 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun requestRealTimeCoinData(selectedTabIndex: Int) {
+    fun sendRealTimeCoinCurrentPriceToMain(data: UpbitWebSocketResponseData) {
+        Log.d(tag, "sendRealTimeCoinCurrentPriceToMain ${data.code}")
+        _realTimeCoinCurrentPrice.postValue(CoinCurrentPriceForMainView(
+            market = data.code,
+            tradePrice = data.tradePrice,
+            changeRate = data.changeRate,
+            change = data.change,
+            changePrice = data.changePrice,
+            accTradePrice24h = data.accTradePrice24h
+        ))
+    }
+    fun getCoinCurrentPrice(selectedTabIndex: Int) {
         when(selectedTabIndex) {
             KRW_STATE -> {
                 getCoinCurrentPriceFromRemote(krwGroupMarketCodes.map { it.market })
-                requestRealTimeCoinDataUseCase(krwGroupMarketCodes)
             }
             BTC_STATE -> {
                 getCoinCurrentPriceFromRemote(btcGroupMarketCodes.map { it.market })
-                requestRealTimeCoinDataUseCase(btcGroupMarketCodes)
             }
             USDT_STATE -> {
                 getCoinCurrentPriceFromRemote(usdtGroupMarketCodes.map { it.market })
-                requestRealTimeCoinDataUseCase(usdtGroupMarketCodes)
             }
         }
     }
@@ -164,6 +178,36 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 메인 화면 리스트에 보여줄 코인 현재가 정보
+     */
+    data class CoinCurrentPriceForMainView(
+        /**
+         * 종목 구분 코드
+         */
+        val market             : String? = null,
+        /**
+         * 종가(현재가)
+         */
+        var tradePrice         : Double?    = null,
+        /**
+         * 변화율의 절대값
+         */
+        var changeRate         : Double? = null,
+        /**
+         * EVEN : 보합, RISE : 상승, FALL : 하락
+         */
+        var change             : String? = null,
+        /**
+         * 변화액의 절대값
+         */
+        var changePrice        : BigDecimal?    = null,
+        /**
+         * 24시간 누적 거래대금
+         */
+        var accTradePrice24h   : BigDecimal? = null,
+    )
+
     fun getMarketName(marketCode: String): String {
         coinMarketCodes.value?.forEach { coinMarketCode ->
             if (marketCode == coinMarketCode.market) {
@@ -171,5 +215,19 @@ class MainViewModel @Inject constructor(
             }
         }
         return ""
+    }
+
+    fun requestRealTimeCoinData(selectedTabIndex: Int) {
+        when(selectedTabIndex) {
+            KRW_STATE -> {
+                requestRealTimeCoinDataUseCase(krwGroupMarketCodes)
+            }
+            BTC_STATE -> {
+                requestRealTimeCoinDataUseCase(btcGroupMarketCodes)
+            }
+            USDT_STATE -> {
+                requestRealTimeCoinDataUseCase(usdtGroupMarketCodes)
+            }
+        }
     }
 }
