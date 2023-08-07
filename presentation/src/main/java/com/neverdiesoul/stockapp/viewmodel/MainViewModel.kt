@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.neverdiesoul.data.repository.remote.websocket.UpbitWebSocketResponseData
+import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.usecase.GetCoinCurrentPriceFromRemoteUseCase
 import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
 import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
@@ -32,11 +34,19 @@ val BTC_STATE = CoinGroup.BTC.ordinal
 val USDT_STATE = CoinGroup.USDT.ordinal
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase, private val tryConnectionToGetRealTimeCoinDataUseCase: TryConnectionToGetRealTimeCoinDataUseCase, private  val requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase) : ViewModel() {
+class MainViewModel @Inject constructor(
+        private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase,
+        private val getCoinCurrentPriceFromRemoteUseCase: GetCoinCurrentPriceFromRemoteUseCase,
+        private val tryConnectionToGetRealTimeCoinDataUseCase: TryConnectionToGetRealTimeCoinDataUseCase,
+        private val requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase
+    ) : ViewModel() {
     private val tag = this::class.simpleName
 
     private var _coinMarketCodes: MutableLiveData<List<CoinMarketCode>> = MutableLiveData(mutableListOf())
     val coinMarketCodes: LiveData<List<CoinMarketCode>> = _coinMarketCodes
+
+    private var _coinCurrentPrices: MutableLiveData<List<CoinCurrentPrice>> = MutableLiveData(mutableListOf())
+    val coinCurrentPrices: LiveData<List<CoinCurrentPrice>> = _coinCurrentPrices
 
     var webSocket: WebSocket? = null
     private var krwGroupMarketCodes = listOf<CoinMarketCode>()
@@ -103,22 +113,25 @@ class MainViewModel @Inject constructor(private val getCoinMarketCodeAllFromLoca
     fun requestRealTimeCoinData(selectedTabIndex: Int) {
         when(selectedTabIndex) {
             KRW_STATE -> {
+                getCoinCurrentPriceFromRemote(krwGroupMarketCodes.map { it.market })
                 requestRealTimeCoinDataUseCase(krwGroupMarketCodes)
             }
             BTC_STATE -> {
+                getCoinCurrentPriceFromRemote(btcGroupMarketCodes.map { it.market })
                 requestRealTimeCoinDataUseCase(btcGroupMarketCodes)
             }
             USDT_STATE -> {
+                getCoinCurrentPriceFromRemote(usdtGroupMarketCodes.map { it.market })
                 requestRealTimeCoinDataUseCase(usdtGroupMarketCodes)
             }
         }
     }
 
     override fun onCleared() {
-        super.onCleared()
-
         tryConnectionToGetRealTimeCoinDataUseCase.closeRealTimeStock()
         Log.d(tag,"RealTimeStock 통신 닫힘")
+
+        super.onCleared()
     }
 
     fun getCoinMarketCodeAllFromLocal() {
@@ -133,5 +146,30 @@ class MainViewModel @Inject constructor(private val getCoinMarketCodeAllFromLoca
                     _coinMarketCodes.value = it
                 }
         }
+    }
+
+    private fun getCoinCurrentPriceFromRemote(markets: List<String>) {
+        val funcName = object{}.javaClass.enclosingMethod?.name
+        viewModelScope.launch {
+            getCoinCurrentPriceFromRemoteUseCase(markets)
+                .onStart { Log.d(tag,"$funcName onStart")  }
+                .onCompletion { Log.d(tag,"$funcName onCompletion") }
+                .catch { Log.d(tag,"Error!! $funcName -> $it") }
+                .collect { coinCurrentPriceList ->
+                    coinCurrentPriceList.forEach { coinCurrentPrice ->
+                        Log.d(tag, "$funcName collect data -> ${coinCurrentPrice.toString()}")
+                    }
+                    _coinCurrentPrices.value = coinCurrentPriceList
+                }
+        }
+    }
+
+    fun getMarketName(marketCode: String): String {
+        coinMarketCodes.value?.forEach { coinMarketCode ->
+            if (marketCode == coinMarketCode.market) {
+                return coinMarketCode.korean_name
+            }
+        }
+        return ""
     }
 }

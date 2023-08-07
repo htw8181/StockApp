@@ -1,5 +1,6 @@
 package com.neverdiesoul.data.repository.remote
 
+import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
 import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.flow.Flow
@@ -10,4 +11,5 @@ interface StockRemoteDataSource {
     fun getRealTimeStock(webSocketListener: WebSocketListener)
     fun closeRealTimeStock()
     fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>)
+    fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<ResponseCoinCurrentPrice>>
 }

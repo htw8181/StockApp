@@ -1,8 +1,11 @@
 package com.neverdiesoul.stockapp.view.composable.navigation
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -27,30 +32,39 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.CoinGroup
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import com.neverdiesoul.stockapp.viewmodel.NONE_STATE
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import kotlin.math.roundToInt
 
 private const val TAG = "NavMainView"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Main(navController: NavHostController, viewModel: MainViewModel?) {
+    val context = LocalContext.current
+
     var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
 
     val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
@@ -122,8 +136,28 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                     indicator = {}
                 )
             }
+
+            val coinCurrentPrices: List<CoinCurrentPrice> by viewModel?.coinCurrentPrices!!.observeAsState(initial = mutableListOf())
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(text = "한글명", modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
+                Text(text = "현재가", modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
+                Text(text = "전일대비", modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
+                Text(text = "거래대금", modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
+            }
+
+            LazyColumn {
+                val onListItemClick = { text: String ->
+                    Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
+                }
+
+                items(coinCurrentPrices) { coinCurrentPrice ->
+                    CurrentPriceItem(coinCurrentPrice, viewModel, onListItemClick)
+                }
+            }
         }
     }
+
     Log.d("1111","22222")
     LaunchedEffect(Unit) {
         viewModel?.getCoinMarketCodeAllFromLocal()
@@ -185,6 +219,66 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 label = { Text(text = barItem.title)}
             )
         }
+    }
+}
+
+@Composable
+private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPrice, viewModel: MainViewModel?, onClick: (String)->Unit) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(60.dp)
+        .padding(start = 10.dp, end = 10.dp)
+        .clickable { onClick(coinCurrentPrice.market ?: "") })
+    {
+        Column(modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .weight(.25f, true)) {
+            Text(text = coinCurrentPrice.market?.let{
+                viewModel?.getMarketName(it)
+            } ?: "")
+            Text(text = coinCurrentPrice.market?.let {
+                val seperatorSymbol = "/"
+                val results = it.replace("-",seperatorSymbol).split(seperatorSymbol)
+                "${results[1]}$seperatorSymbol${results[0]}"
+            } ?: "")
+        }
+        Text(textAlign = TextAlign.End, modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .weight(.25f, true),text = coinCurrentPrice.tradePrice?.let {
+            DecimalFormat("#,###").format(it.toInt()).toString()
+        } ?: "")
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .weight(.25f, true)) {
+            Text(text = coinCurrentPrice.changeRate?.let{
+                val changeSymbol = when(coinCurrentPrice.change) {
+                    "RISE" -> "+"
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                    if (result == "0") "0.00" else result
+                }
+                "$changeSymbol${changeRate}%"
+            } ?: "")
+            Text(text = coinCurrentPrice.changePrice?.let {
+                val changeSymbol = when(coinCurrentPrice.change) {
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                    if (result == "0") "0.0000" else result
+                }
+                "$changeSymbol$changePrice"
+            } ?: "")
+        }
+        Text(textAlign = TextAlign.End, modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .weight(.25f, true),
+            text = coinCurrentPrice.accTradePrice24h?.let {
+                val result = (it.toDouble() / 100000) * 0.1
+                "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+            } ?: "")
     }
 }
 

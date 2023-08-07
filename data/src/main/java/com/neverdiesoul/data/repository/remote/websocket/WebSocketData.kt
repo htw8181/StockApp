@@ -14,133 +14,133 @@ data class UpbitWebSocketResponseData (
     /**
      * 타입 (ticker - 현재가, trade - 체결, orderbook - 호가, myTrade - 내 체결)
      */
-    @SerializedName("type"                  ) var type               : String?  = null,
+    @SerializedName("type"                  ) val type               : String?  = null,
     /**
      * 마켓 코드 (ex. KRW-BTC)
      */
-    @SerializedName("code"                  ) var code               : String?  = null,
+    @SerializedName("code"                  ) val code               : String?  = null,
     /**
      * 시가
      */
-    @SerializedName("opening_price"         ) var openingPrice       : Double?     = null,
+    @SerializedName("opening_price"         ) val openingPrice       : Double?     = null,
     /**
      * 고가
      */
-    @SerializedName("high_price"            ) var highPrice          : Double?     = null,
+    @SerializedName("high_price"            ) val highPrice          : Double?     = null,
     /**
      * 저가
      */
-    @SerializedName("low_price"             ) var lowPrice           : Double?     = null,
+    @SerializedName("low_price"             ) val lowPrice           : Double?     = null,
     /**
      * 현재가
      */
-    @SerializedName("trade_price"           ) var tradePrice         : Double?     = null,
+    @SerializedName("trade_price"           ) val tradePrice         : Double?     = null,
     /**
      * 전일 종가
      */
-    @SerializedName("prev_closing_price"    ) var prevClosingPrice   : Double?     = null,
+    @SerializedName("prev_closing_price"    ) val prevClosingPrice   : Double?     = null,
     /**
      * 전일 대비(RISE - 상승, EVEN - 보합, FALL - 하락)
      */
-    @SerializedName("change"                ) var change             : String?  = null,
+    @SerializedName("change"                ) val change             : String?  = null,
     /**
      * 부호 없는 전일 대비 값
      */
-    @SerializedName("change_price"          ) var changePrice        : Double?     = null,
+    @SerializedName("change_price"          ) val changePrice        : Double?     = null,
     /**
      * 전일 대비 값
      */
-    @SerializedName("signed_change_price"   ) var signedChangePrice  : Double?     = null,
+    @SerializedName("signed_change_price"   ) val signedChangePrice  : Double?     = null,
     /**
      * 부호 없는 전일 대비 등락율
      */
-    @SerializedName("change_rate"           ) var changeRate         : Double?  = null,
+    @SerializedName("change_rate"           ) val changeRate         : Double?  = null,
     /**
      * 전일 대비 등락율
      */
-    @SerializedName("signed_change_rate"    ) var signedChangeRate   : Double?  = null,
+    @SerializedName("signed_change_rate"    ) val signedChangeRate   : Double?  = null,
     /**
      * 가장 최근 거래량
      */
-    @SerializedName("trade_volume"          ) var tradeVolume        : Double?  = null,
+    @SerializedName("trade_volume"          ) val tradeVolume        : Double?  = null,
     /**
      * 누적 거래량(UTC 0시 기준)
      */
-    @SerializedName("acc_trade_volume"      ) var accTradeVolume     : Double?  = null,
+    @SerializedName("acc_trade_volume"      ) val accTradeVolume     : Double?  = null,
     /**
      * 24시간 누적 거래량
      */
-    @SerializedName("acc_trade_volume_24h"  ) var accTradeVolume24h  : Double?  = null,
+    @SerializedName("acc_trade_volume_24h"  ) val accTradeVolume24h  : Double?  = null,
     /**
      * 누적 거래대금(UTC 0시 기준)
      */
-    @SerializedName("acc_trade_price"       ) var accTradePrice      : Double?  = null,
+    @SerializedName("acc_trade_price"       ) val accTradePrice      : Double?  = null,
     /**
      * 24시간 누적 거래대금
      */
-    @SerializedName("acc_trade_price_24h"   ) var accTradePrice24h   : Double?  = null,
+    @SerializedName("acc_trade_price_24h"   ) val accTradePrice24h   : Double?  = null,
     /**
      * 최근 거래 일자(UTC) (yyyyMMdd)
      */
-    @SerializedName("trade_date"            ) var tradeDate          : String?  = null,
+    @SerializedName("trade_date"            ) val tradeDate          : String?  = null,
     /**
      * 최근 거래 시각(UTC) (HHmmss)
      */
-    @SerializedName("trade_time"            ) var tradeTime          : String?  = null,
+    @SerializedName("trade_time"            ) val tradeTime          : String?  = null,
     /**
      * 체결 타임스탬프 (milliseconds)
      */
-    @SerializedName("trade_timestamp"       ) var tradeTimestamp     : Long?     = null,
+    @SerializedName("trade_timestamp"       ) val tradeTimestamp     : Long?     = null,
     /**
      * 매수/매도 구분 (ASK - 매도, BID - 매수)
      */
-    @SerializedName("ask_bid"               ) var askBid             : String?  = null,
+    @SerializedName("ask_bid"               ) val askBid             : String?  = null,
     /**
      * 누적 매도량
      */
-    @SerializedName("acc_ask_volume"        ) var accAskVolume       : Double?  = null,
+    @SerializedName("acc_ask_volume"        ) val accAskVolume       : Double?  = null,
     /**
      * 누적 매수량
      */
-    @SerializedName("acc_bid_volume"        ) var accBidVolume       : Double?  = null,
+    @SerializedName("acc_bid_volume"        ) val accBidVolume       : Double?  = null,
     /**
      * 52주 최고가
      */
-    @SerializedName("highest_52_week_price" ) var highest52WeekPrice : Double?     = null,
+    @SerializedName("highest_52_week_price" ) val highest52WeekPrice : Double?     = null,
     /**
      * 52주 최고가 달성일 (yyyy-MM-dd)
      */
-    @SerializedName("highest_52_week_date"  ) var highest52WeekDate  : String?  = null,
+    @SerializedName("highest_52_week_date"  ) val highest52WeekDate  : String?  = null,
     /**
      * 52주 최저가
      */
-    @SerializedName("lowest_52_week_price"  ) var lowest52WeekPrice  : Double?     = null,
+    @SerializedName("lowest_52_week_price"  ) val lowest52WeekPrice  : Double?     = null,
     /**
      * 52주 최저가 달성일 (yyyy-MM-dd)
      */
-    @SerializedName("lowest_52_week_date"   ) var lowest52WeekDate   : String?  = null,
+    @SerializedName("lowest_52_week_date"   ) val lowest52WeekDate   : String?  = null,
     /**
      * 거래상태(PREVIEW - 입금지원, ACTIVE - 거래지원가능, DELISTED - 거래지원종료)
      */
-    @SerializedName("market_state"          ) var marketState        : String?  = null,
+    @SerializedName("market_state"          ) val marketState        : String?  = null,
     /**
      * 거래 정지 여부
      */
-    @SerializedName("is_trading_suspended"  ) var isTradingSuspended : Boolean? = null,
+    @SerializedName("is_trading_suspended"  ) val isTradingSuspended : Boolean? = null,
     /**
      * 상장폐지일
      */
-    @SerializedName("delisting_date"        ) var delistingDate      : String?  = null,
+    @SerializedName("delisting_date"        ) val delistingDate      : String?  = null,
     /**
      * 유의 종목 여부(NONE - 해당없음, CAUTION - 투자유의)
      */
-    @SerializedName("market_warning"        ) var marketWarning      : String?  = null,
+    @SerializedName("market_warning"        ) val marketWarning      : String?  = null,
     /**
      * 타임스탬프 (millisecond)
      */
-    @SerializedName("timestamp"             ) var timestamp          : Long?     = null,
+    @SerializedName("timestamp"             ) val timestamp          : Long?     = null,
     /**
      * 스트림 타입(SNAPSHOT - 스냅샷, REALTIME - 실시간)
      */
-    @SerializedName("stream_type"           ) var streamType         : String?  = null
+    @SerializedName("stream_type"           ) val streamType         : String?  = null
 )

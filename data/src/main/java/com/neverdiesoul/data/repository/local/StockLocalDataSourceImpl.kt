@@ -2,7 +2,7 @@ package com.neverdiesoul.data.repository.local
 
 import com.neverdiesoul.data.db.dao.StockDao
 import com.neverdiesoul.data.db.entity.CoinMarketCodeEntity
-import com.neverdiesoul.data.mapper.Mapper.toDomain
+import com.neverdiesoul.data.mapper.Mapper.toDomainCoinMarketCode
 import com.neverdiesoul.domain.model.CoinMarketCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,6 +16,6 @@ class StockLocalDataSourceImpl @Inject constructor(private val stockDao: StockDa
     }
 
     override fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>> = flow {
-        emit(stockDao.getCoinMarketCodeAllFromLocal().toDomain())
+        emit(stockDao.getCoinMarketCodeAllFromLocal().toDomainCoinMarketCode())
     }
 }

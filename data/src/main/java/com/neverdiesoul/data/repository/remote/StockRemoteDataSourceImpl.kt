@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.api.ApiInterface
+import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
 import com.neverdiesoul.data.repository.remote.websocket.UpbitType
@@ -73,5 +74,26 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
         Log.d(tag,"sendWebSocket : $sendData")
         //socket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
         socket.send(sendData)
+    }
+
+    override fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<ResponseCoinCurrentPrice>> {
+        val funcName = object{}.javaClass.enclosingMethod.name
+        return flow {
+            try {
+                val response = retrofitService.getCoinCurrentPriceFromRemote(markets)
+                if (response.isSuccessful) {
+                    response.body()?.let { 
+                        it.forEach { responseCoinCurrentPrice ->
+                            Log.d(tag, "$funcName collect data -> ${responseCoinCurrentPrice.toString()}")
+                        }
+                        emit(it)
+                    }
+                } else {
+                    Log.d(tag, "코인 현재가 수신 에러 ${response.code()} : ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.d(tag, "코인 현재가 수신 에러 ${e.message}")
+            }
+        }
     }
 }
