@@ -186,7 +186,8 @@ class MainViewModel @Inject constructor(
                 changeRate = data.changeRate,
                 change = data.change,
                 changePrice = data.changePrice,
-                accTradePrice24h = data.accTradePrice24h
+                accTradePrice24h = data.accTradePrice24h,
+                isNewData = true
             ))
         }
     }
@@ -269,6 +270,10 @@ class MainViewModel @Inject constructor(
          * 24시간 누적 거래대금
          */
         var accTradePrice24h   : BigDecimal? = null,
+        /**
+         * 실시간으로 새로 들어온 데이터 인지 여부
+         */
+        var isNewData          : Boolean? = false
     )
 
     fun getMarketName(marketCode: String): String {

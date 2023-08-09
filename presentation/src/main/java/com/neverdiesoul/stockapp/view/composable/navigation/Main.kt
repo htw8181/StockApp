@@ -6,9 +6,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -156,12 +158,20 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 )
             }
 
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Spacer(modifier = Modifier
+                .background(color = Color(red = 241, green = 241, blue = 244))
+                .height(1.dp)
+                .fillMaxWidth())
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally).background(color = Color(red = 244, green = 245, blue = 248))) {
                 Text(text = stringResource(R.string.main_list_header1), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header2), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header3), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header4), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
             }
+            Spacer(modifier = Modifier
+                .background(color = Color(red = 241, green = 241, blue = 244))
+                .height(1.dp)
+                .fillMaxWidth())
 
             LazyColumn {
                 val onListItemClick = { text: String ->
@@ -170,6 +180,10 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
 
                 items(coinCurrentPriceForMainViewList) { coinCurrentPriceForMainView ->
                     CurrentPriceItem(coinCurrentPriceForMainView, viewModel, onListItemClick)
+                    Spacer(modifier = Modifier
+                        .background(color = Color(red = 241, green = 241, blue = 244))
+                        .height(1.dp)
+                        .fillMaxWidth())
                 }
             }
         }
@@ -267,6 +281,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 coinCurrentPriceForMainView.change = realTimeCoinCurrentPrice?.change
                 coinCurrentPriceForMainView.changeRate = realTimeCoinCurrentPrice?.changeRate
                 coinCurrentPriceForMainView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
+                coinCurrentPriceForMainView.isNewData = realTimeCoinCurrentPrice?.isNewData
                 return@forEach
             }
         }
@@ -336,6 +351,11 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
         .padding(start = 10.dp, end = 10.dp)
         .clickable { onClick(coinCurrentPrice.market ?: "") })
     {
+        val textColor: Color = when(coinCurrentPrice.change) {
+            "RISE" -> Color.Red
+            "FALL" -> Color.Blue
+            else -> Color.Black
+        }
         Column(modifier = Modifier
             .align(Alignment.CenterVertically)
             .weight(.25f, true)) {
@@ -348,15 +368,24 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
                 "${results[1]}$seperatorSymbol${results[0]}"
             } ?: "")
         }
-        Text(textAlign = TextAlign.End, modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.25f, true),text = coinCurrentPrice.tradePrice?.let {
-            DecimalFormat("#,###").format(it.toInt()).toString()
-        } ?: "")
+
+        Box(modifier = Modifier.border(width = 2.dp, color = if (coinCurrentPrice.isNewData == true) textColor else Color.Transparent , shape = RectangleShape)
+            .weight(.25f, true)
+            .fillMaxHeight())
+        {
+            Text(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 2.dp), textAlign = TextAlign.End, color = textColor,text = coinCurrentPrice.tradePrice?.let {
+                DecimalFormat("#,###").format(it.toInt()).toString()
+            } ?: "")
+
+        }
+        if (coinCurrentPrice.isNewData == true) {
+            coinCurrentPrice.isNewData = false
+        }
+
         Column(horizontalAlignment = Alignment.End, modifier = Modifier
             .align(Alignment.CenterVertically)
             .weight(.25f, true)) {
-            Text(text = coinCurrentPrice.changeRate?.let{
+            Text(color = textColor, text = coinCurrentPrice.changeRate?.let{
                 val changeSymbol = when(coinCurrentPrice.change) {
                     "RISE" -> "+"
                     "FALL" -> "-"
@@ -367,7 +396,7 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
                 }
                 "$changeSymbol${changeRate}%"
             } ?: "")
-            Text(text = coinCurrentPrice.changePrice?.let {
+            Text(color = textColor, text = coinCurrentPrice.changePrice?.let {
                 val changeSymbol = when(coinCurrentPrice.change) {
                     "FALL" -> "-"
                     else -> ""
