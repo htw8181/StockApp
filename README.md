@@ -82,8 +82,12 @@
   1. 메인화면에서 KRW 기준으로 현재가 조회 API를 통해 LazyColumn으로 코인 현재가 리스트 출력 로직 적용
 - 2023년 8월 8일
   1. 메인화면에서 KRW 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
+- 2023년 8월 9일
+  1. 메인화면 실시간 데이터 스트림 처리는 liveData보다는 sharedFlow가 쫌 더 부드러운 듯 하여 sharedFlow 적용
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
+  - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
+  - 메인에서 flow collect 해서 실시간 데이터를 받는 것까지는 괜찮은데, 이를 composable에서 state 변수가 몇몇 받아내지 못하고 있다.. 
   * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 
   - [참고 URL](https://hungseong.tistory.com/33)
   - 이 건은 취소 한다. DAO 함수(Select 쿼리문) 반환형을 Flow로 적용하면, DB데이터가 바뀔때마다 자동으로 호출되는데,

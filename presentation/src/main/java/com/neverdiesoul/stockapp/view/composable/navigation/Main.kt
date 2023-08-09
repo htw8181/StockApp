@@ -27,13 +27,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -66,11 +66,23 @@ private const val TAG = "NavMainView"
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Main(navController: NavHostController, viewModel: MainViewModel?) {
+    val funcName = object{}.javaClass.enclosingMethod?.name
     val context = LocalContext.current
 
     var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
 
     val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
+
+    val coinCurrentPrices: List<CoinCurrentPrice> by viewModel?.coinCurrentPrices!!.observeAsState(initial = mutableListOf())
+
+    val realTimeCoinCurrentPrice by viewModel?.sharedFlow!!.collectAsState(initial = null)
+    /*var realTimeCoinCurrentPrice: CoinCurrentPriceForMainView? by remember {
+        mutableStateOf(null)
+    }*/
+
+    val coinCurrentPriceForMainViewList = remember {
+        mutableStateListOf<CoinCurrentPriceForMainView>()
+    }
 
     Scaffold(
         topBar = {
@@ -132,38 +144,16 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                                 selectedContentColor = selectedColor,
                                 unselectedContentColor = Color.Gray,
                                 selected = marketCodeIndex == selectedTabIndex,
-                                onClick = { selectedTabIndex = marketCodeIndex },
+                                onClick = {
+                                    selectedTabIndex = marketCodeIndex
+                                    // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 현재가 조회후 실시간 코인 정보 요청
+                                    viewModel?.getCoinCurrentPrice(selectedTabIndex)
+                                },
                                 content = { Text(text = marketCodeName.name, modifier = Modifier.padding(10.dp)) })
                         }
                     },
                     indicator = {}
                 )
-            }
-
-            val coinCurrentPrices: List<CoinCurrentPrice> by viewModel?.coinCurrentPrices!!.observeAsState(initial = mutableListOf())
-            val realTimeCoinCurrentPrice: CoinCurrentPriceForMainView by viewModel?.realTimeCoinCurrentPrice!!.observeAsState(initial = CoinCurrentPriceForMainView())
-
-            val coinCurrentPriceForMainViewList = remember {
-                mutableStateListOf<CoinCurrentPriceForMainView>()
-            }
-            coinCurrentPrices.forEach { coinCurrentPrice->
-                coinCurrentPriceForMainViewList.add(CoinCurrentPriceForMainView(
-                    market = coinCurrentPrice.market,
-                    tradePrice = coinCurrentPrice.tradePrice,
-                    changePrice = coinCurrentPrice.changePrice,
-                    change = coinCurrentPrice.change,
-                    changeRate = coinCurrentPrice.changeRate,
-                    accTradePrice24h = coinCurrentPrice.accTradePrice24h
-                ))
-            }
-            coinCurrentPriceForMainViewList.forEach { coinCurrentPriceForMainView->
-                if (realTimeCoinCurrentPrice != null && coinCurrentPriceForMainView.market == realTimeCoinCurrentPrice.market) {
-                    coinCurrentPriceForMainView.tradePrice = realTimeCoinCurrentPrice.tradePrice
-                    coinCurrentPriceForMainView.changePrice = realTimeCoinCurrentPrice.changePrice
-                    coinCurrentPriceForMainView.change = realTimeCoinCurrentPrice.change
-                    coinCurrentPriceForMainView.changeRate = realTimeCoinCurrentPrice.changeRate
-                    coinCurrentPriceForMainView.accTradePrice24h = realTimeCoinCurrentPrice.accTradePrice24h
-                }
             }
 
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
@@ -182,20 +172,11 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                     CurrentPriceItem(coinCurrentPriceForMainView, viewModel, onListItemClick)
                 }
             }
-
-            LaunchedEffect(coinCurrentPrices) {
-                Log.d(TAG,"selectedTabIndex $selectedTabIndex,coinCurrentPrices $coinCurrentPrices changed!!")
-                if (!coinCurrentPrices.isNullOrEmpty()) {
-                    viewModel?.requestRealTimeCoinData(selectedTabIndex)
-                }
-            }
         }
     }
 
-    Log.d("1111","22222")
     LaunchedEffect(Unit) {
         viewModel?.getCoinMarketCodeAllFromLocal()
-//        viewModel?.getRealTimeStock()
     }
 
     LaunchedEffect(coinMarketCodes) {
@@ -230,12 +211,102 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
         }
     }
 
-    LaunchedEffect(selectedTabIndex) {
-        Log.d(TAG,"current selectedTabIndex $selectedTabIndex")
-        if (selectedTabIndex >= 0) {
-            // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 현재가 조회후 실시간 코인 정보 요청
-            viewModel?.getCoinCurrentPrice(selectedTabIndex)
+    LaunchedEffect(coinCurrentPrices) {
+        Log.d(TAG,"selectedTabIndex $selectedTabIndex,coinCurrentPrices $coinCurrentPrices changed!!")
+        if (!coinCurrentPrices.isNullOrEmpty()) {
+            coinCurrentPriceForMainViewList.clear()
+            coinCurrentPrices.forEach { coinCurrentPrice->
+                coinCurrentPriceForMainViewList.add(CoinCurrentPriceForMainView(
+                    market = coinCurrentPrice.market,
+                    tradePrice = coinCurrentPrice.tradePrice,
+                    changePrice = coinCurrentPrice.changePrice,
+                    change = coinCurrentPrice.change,
+                    changeRate = coinCurrentPrice.changeRate,
+                    accTradePrice24h = coinCurrentPrice.accTradePrice24h
+                ))
+            }
+
+            viewModel?.requestRealTimeCoinData(selectedTabIndex)
         }
+    }
+    LaunchedEffect(realTimeCoinCurrentPrice) {
+        if (realTimeCoinCurrentPrice == null) return@LaunchedEffect
+
+        if (realTimeCoinCurrentPrice?.market == "KRW-BTC") {
+            Log.d("$funcName","${funcName}          (3)KRW-BTC 현재가 ${realTimeCoinCurrentPrice?.tradePrice?.let {
+                DecimalFormat("#,###").format(it.toInt()).toString()
+            } ?: ""} 전일대비 ${realTimeCoinCurrentPrice?.changeRate?.let{
+                val changeSymbol = when(realTimeCoinCurrentPrice?.change) {
+                    "RISE" -> "+"
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                    if (result == "0") "0.00" else result
+                }
+                "$changeSymbol${changeRate}%"
+            } ?: ""} ${realTimeCoinCurrentPrice?.changePrice?.let {
+                val changeSymbol = when(realTimeCoinCurrentPrice?.change) {
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                    if (result == "0") "0.0000" else result
+                }
+                "$changeSymbol$changePrice"
+            } ?: ""} 거래대금 ${realTimeCoinCurrentPrice?.accTradePrice24h?.let {
+                val result = (it.toDouble() / 100000) * 0.1
+                "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+            } ?: ""}")
+        }
+
+        coinCurrentPriceForMainViewList.forEach { coinCurrentPriceForMainView->
+            if (realTimeCoinCurrentPrice != null && coinCurrentPriceForMainView.market == realTimeCoinCurrentPrice?.market) {
+                coinCurrentPriceForMainView.tradePrice = realTimeCoinCurrentPrice?.tradePrice
+                coinCurrentPriceForMainView.changePrice = realTimeCoinCurrentPrice?.changePrice
+                coinCurrentPriceForMainView.change = realTimeCoinCurrentPrice?.change
+                coinCurrentPriceForMainView.changeRate = realTimeCoinCurrentPrice?.changeRate
+                coinCurrentPriceForMainView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
+                return@forEach
+            }
+        }
+        // 여기까지 끝나면, Scaffold body 부터 다시 시작함
+        Log.d(TAG,"LaunchedEffect(realTimeCoinCurrentPrice) end")
+    }
+
+    LaunchedEffect(Unit) {
+        /*viewModel?.sharedFlow?.collect { coinData->
+            //Log.d(TAG, "sendRealTimeCoinCurrentPriceToMain ${coinData.market}")
+            if (coinData?.market == "KRW-BTC") {
+                Log.d("$funcName","$funcName          (2)KRW-BTC 현재가 ${coinData?.tradePrice?.let {
+                    DecimalFormat("#,###").format(it.toInt()).toString()
+                } ?: ""} 전일대비 ${coinData?.changeRate?.let{
+                    val changeSymbol = when(coinData?.change) {
+                        "RISE" -> "+"
+                        "FALL" -> "-"
+                        else -> ""
+                    }
+                    val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                        if (result == "0") "0.00" else result
+                    }
+                    "$changeSymbol${changeRate}%"
+                } ?: ""} ${coinData?.changePrice?.let {
+                    val changeSymbol = when(coinData?.change) {
+                        "FALL" -> "-"
+                        else -> ""
+                    }
+                    val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                        if (result == "0") "0.0000" else result
+                    }
+                    "$changeSymbol$changePrice"
+                } ?: ""} 거래대금 ${coinData?.accTradePrice24h?.let {
+                    val result = (it.toDouble() / 100000) * 0.1
+                    "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+                } ?: ""}")
+            }
+            //coinData까지는 정상 수신이 되나, 이를 compose state에 전달하면 state가 모두 받아내지 못하고 몇몇을 skip하고 있다..
+            realTimeCoinCurrentPrice = coinData
+        }*/
     }
 }
 

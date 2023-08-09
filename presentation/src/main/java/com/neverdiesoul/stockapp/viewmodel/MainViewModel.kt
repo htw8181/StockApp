@@ -14,6 +14,8 @@ import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
 import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -23,7 +25,10 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 enum class CoinGroup {
     KRW,BTC,USDT
@@ -49,8 +54,11 @@ class MainViewModel @Inject constructor(
     private var _coinCurrentPrices: MutableLiveData<List<CoinCurrentPrice>> = MutableLiveData(mutableListOf())
     val coinCurrentPrices: LiveData<List<CoinCurrentPrice>> = _coinCurrentPrices
 
-    private var _realTimeCoinCurrentPrice: MutableLiveData<CoinCurrentPriceForMainView> = MutableLiveData(CoinCurrentPriceForMainView())
-    val realTimeCoinCurrentPrice: LiveData<CoinCurrentPriceForMainView> = _realTimeCoinCurrentPrice
+    private val _sharedFlow = MutableSharedFlow<CoinCurrentPriceForMainView>(
+        /*replay = 10,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST*/
+    )
+    val sharedFlow = _sharedFlow.asSharedFlow()
 
     var webSocket: WebSocket? = null
 
@@ -67,11 +75,6 @@ class MainViewModel @Inject constructor(
     fun setUsdtGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
         this.usdtGroupMarketCodes = marketCodes
     }
-
-    init {
-
-    }
-
     fun getRealTimeStock() {
         tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this))
         tryConnectionToGetRealTimeCoinDataUseCase()
@@ -104,6 +107,33 @@ class MainViewModel @Inject constructor(
             try {
                 val res = Gson().fromJson(bytes.string(Charsets.UTF_8),UpbitWebSocketResponseData::class.java)
                 Log.d(tag,"수신 bytes=> $res")
+                /*if (res.code == "KRW-BTC") {
+                    Log.d(tag,"KRW-BTC 현재가 ${res.tradePrice?.let {
+                        DecimalFormat("#,###").format(it.toInt()).toString()
+                    } ?: ""} 전일대비 ${res.changeRate?.let{
+                        val changeSymbol = when(res.change) {
+                            "RISE" -> "+"
+                            "FALL" -> "-"
+                            else -> ""
+                        }
+                        val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                            if (result == "0") "0.00" else result
+                        }
+                        "$changeSymbol${changeRate}%"
+                    } ?: ""} ${res.changePrice?.let {
+                        val changeSymbol = when(res.change) {
+                            "FALL" -> "-"
+                            else -> ""
+                        }
+                        val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                            if (result == "0") "0.0000" else result
+                        }
+                        "$changeSymbol$changePrice"
+                    } ?: ""} 거래대금 ${res.accTradePrice24h?.let {
+                        val result = (it.toDouble() / 100000) * 0.1
+                        "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+                    } ?: ""}")
+                }*/
                 viewModel.sendRealTimeCoinCurrentPriceToMain(res)
             } catch (e: Exception) {
                 Log.d(tag,e.message.toString())
@@ -117,15 +147,48 @@ class MainViewModel @Inject constructor(
     }
 
     fun sendRealTimeCoinCurrentPriceToMain(data: UpbitWebSocketResponseData) {
+        val funcName = object{}.javaClass.enclosingMethod?.name
         Log.d(tag, "sendRealTimeCoinCurrentPriceToMain ${data.code}")
-        _realTimeCoinCurrentPrice.postValue(CoinCurrentPriceForMainView(
-            market = data.code,
-            tradePrice = data.tradePrice,
-            changeRate = data.changeRate,
-            change = data.change,
-            changePrice = data.changePrice,
-            accTradePrice24h = data.accTradePrice24h
-        ))
+        var logMsg = "Empty"
+        if (data.code == "KRW-BTC") {
+            logMsg = "${MainViewModel::class.simpleName} (1)KRW-BTC 현재가 ${data.tradePrice?.let {
+                DecimalFormat("#,###").format(it.toInt()).toString()
+            } ?: ""} 전일대비 ${data.changeRate?.let{
+                val changeSymbol = when(data.change) {
+                    "RISE" -> "+"
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                    if (result == "0") "0.00" else result
+                }
+                "$changeSymbol${changeRate}%"
+            } ?: ""} ${data.changePrice?.let {
+                val changeSymbol = when(data.change) {
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                    if (result == "0") "0.0000" else result
+                }
+                "$changeSymbol$changePrice"
+            } ?: ""} 거래대금 ${data.accTradePrice24h?.let {
+                val result = (it.toDouble() / 100000) * 0.1
+                "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+            } ?: ""}"
+            Log.d(tag,logMsg)
+        }
+
+        viewModelScope.launch {
+            _sharedFlow.emit(CoinCurrentPriceForMainView(
+                market = data.code,
+                tradePrice = data.tradePrice,
+                changeRate = data.changeRate,
+                change = data.change,
+                changePrice = data.changePrice,
+                accTradePrice24h = data.accTradePrice24h
+            ))
+        }
     }
     fun getCoinCurrentPrice(selectedTabIndex: Int) {
         when(selectedTabIndex) {
