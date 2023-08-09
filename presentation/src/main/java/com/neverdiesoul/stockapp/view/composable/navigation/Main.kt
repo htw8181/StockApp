@@ -56,6 +56,7 @@ import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.CoinGroup
+import com.neverdiesoul.stockapp.viewmodel.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinCurrentPriceForMainView
 import com.neverdiesoul.stockapp.viewmodel.NONE_STATE
@@ -84,6 +85,12 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
 
     val coinCurrentPriceForMainViewList = remember {
         mutableStateListOf<CoinCurrentPriceForMainView>()
+    }
+
+    val onTabClick: (Int)->Unit = {
+        selectedTabIndex = it
+        // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 현재가 조회후 실시간 코인 정보 요청
+        viewModel?.getCoinCurrentPrice(selectedTabIndex)
     }
 
     Scaffold(
@@ -147,9 +154,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                                 unselectedContentColor = Color.Gray,
                                 selected = marketCodeIndex == selectedTabIndex,
                                 onClick = {
-                                    selectedTabIndex = marketCodeIndex
-                                    // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 현재가 조회후 실시간 코인 정보 요청
-                                    viewModel?.getCoinCurrentPrice(selectedTabIndex)
+                                    onTabClick(marketCodeIndex)
                                 },
                                 content = { Text(text = marketCodeName.name, modifier = Modifier.padding(10.dp)) })
                         }
@@ -190,6 +195,11 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
     }
 
     LaunchedEffect(Unit) {
+        viewModel?.setMainViewEvent(object : MainViewModel.MainViewEvent {
+            override fun viewOnReady() {
+                onTabClick(KRW_STATE)
+            }
+        })
         viewModel?.getCoinMarketCodeAllFromLocal()
     }
 

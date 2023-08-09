@@ -75,6 +75,15 @@ class MainViewModel @Inject constructor(
     fun setUsdtGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
         this.usdtGroupMarketCodes = marketCodes
     }
+
+    interface MainViewEvent {
+        fun viewOnReady()
+    }
+    private var mainViewEvent: MainViewEvent? = null
+    fun setMainViewEvent(event: MainViewEvent) {
+        this.mainViewEvent = event
+    }
+
     fun getRealTimeStock() {
         tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this))
         tryConnectionToGetRealTimeCoinDataUseCase()
@@ -143,10 +152,11 @@ class MainViewModel @Inject constructor(
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
             viewModel.webSocket = webSocket
+            viewModel.mainViewEvent?.viewOnReady()
         }
     }
 
-    fun sendRealTimeCoinCurrentPriceToMain(data: UpbitWebSocketResponseData) {
+    private fun sendRealTimeCoinCurrentPriceToMain(data: UpbitWebSocketResponseData) {
         val funcName = object{}.javaClass.enclosingMethod?.name
         Log.d(tag, "sendRealTimeCoinCurrentPriceToMain ${data.code}")
         var logMsg = "Empty"
