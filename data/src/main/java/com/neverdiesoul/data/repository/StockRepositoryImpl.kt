@@ -73,8 +73,8 @@ class StockRepositoryImpl @Inject constructor(
 
     override fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>> = stockLocalDataSource.getCoinMarketCodeAllFromLocal()
 
-    override fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>) {
-        stockRemoteDataSource.requestRealTimeCoinData(marketCodes)
+    override fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>) {
+        stockRemoteDataSource.requestRealTimeCoinData(dataType, marketCodes)
     }
 
     override fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<CoinCurrentPrice>> = flow {

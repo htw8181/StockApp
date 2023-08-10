@@ -2,7 +2,6 @@ package com.neverdiesoul.stockapp.view.composable.navigation
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -55,6 +55,7 @@ import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.CoinGroup
 import com.neverdiesoul.stockapp.viewmodel.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
@@ -66,19 +67,19 @@ import kotlin.math.roundToInt
 
 private const val TAG = "NavMainView"
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Main(navController: NavHostController, viewModel: MainViewModel?) {
+fun Main(navController: NavHostController, viewModel: MainViewModel) {
     val funcName = object{}.javaClass.enclosingMethod?.name
     val context = LocalContext.current
 
     var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
 
-    val coinMarketCodes: List<CoinMarketCode> by viewModel?.coinMarketCodes!!.observeAsState(initial = mutableListOf())
+    val coinMarketCodes: List<CoinMarketCode> by viewModel.coinMarketCodes.observeAsState(initial = mutableListOf())
 
-    val coinCurrentPrices: List<CoinCurrentPrice> by viewModel?.coinCurrentPrices!!.observeAsState(initial = mutableListOf())
+    val coinCurrentPrices: List<CoinCurrentPrice> by viewModel.coinCurrentPrices.observeAsState(initial = mutableListOf())
 
-    val realTimeCoinCurrentPrice by viewModel?.sharedFlow!!.collectAsState(initial = null)
+    val realTimeCoinCurrentPrice by viewModel.sharedFlow.collectAsState(initial = null)
     /*var realTimeCoinCurrentPrice: CoinCurrentPriceForMainView? by remember {
         mutableStateOf(null)
     }*/
@@ -90,7 +91,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
     val onTabClick: (Int)->Unit = {
         selectedTabIndex = it
         // KRW/BTC/USDT 탭을 클릭할 때마다 해당 마켓 코드로 현재가 조회후 실시간 코인 정보 요청
-        viewModel?.getCoinCurrentPrice(selectedTabIndex)
+        viewModel.getCoinCurrentPrice(selectedTabIndex)
     }
 
     Scaffold(
@@ -167,7 +168,9 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 .background(color = Color(red = 241, green = 241, blue = 244))
                 .height(1.dp)
                 .fillMaxWidth())
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally).background(color = Color(red = 244, green = 245, blue = 248))) {
+            Row(modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .background(color = Color(red = 244, green = 245, blue = 248))) {
                 Text(text = stringResource(R.string.main_list_header1), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header2), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header3), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
@@ -179,8 +182,13 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 .fillMaxWidth())
 
             LazyColumn {
-                val onListItemClick = { text: String ->
-                    Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
+                val onListItemClick = { market: String ->
+                    Toast.makeText(context,market, Toast.LENGTH_SHORT).show()
+                    // TODO 웹소켓 닫고 가야 한다.
+                    viewModel.closeRealTimeStock()
+                    navController.navigate(NavRoutes.Detail.route + "/$market/${viewModel.getMarketName(market)}") {
+                        launchSingleTop = true
+                    }
                 }
 
                 items(coinCurrentPriceForMainViewList) { coinCurrentPriceForMainView ->
@@ -195,12 +203,17 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
     }
 
     LaunchedEffect(Unit) {
-        viewModel?.setMainViewEvent(object : MainViewModel.MainViewEvent {
+        viewModel.setViewEvent(object : BaseRealTimeViewModel.ViewEvent {
             override fun viewOnReady() {
                 onTabClick(KRW_STATE)
             }
+
+            override fun viewOnExit() {
+                Toast.makeText(context,"viewOnExit", Toast.LENGTH_SHORT).show()
+                Log.d(TAG,"viewOnExit")
+            }
         })
-        viewModel?.getCoinMarketCodeAllFromLocal()
+        viewModel.getCoinMarketCodeAllFromLocal()
     }
 
     LaunchedEffect(coinMarketCodes) {
@@ -223,15 +236,15 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
 
                 with(entry) {
                     when(key) {
-                        CoinGroup.KRW.name -> viewModel?.setKrwGroupMarketCodes(value)
-                        CoinGroup.BTC.name -> viewModel?.setBtcGroupMarketCodes(value)
-                        CoinGroup.USDT.name -> viewModel?.setUsdtGroupMarketCodes(value)
+                        CoinGroup.KRW.name -> viewModel.setKrwGroupMarketCodes(value)
+                        CoinGroup.BTC.name -> viewModel.setBtcGroupMarketCodes(value)
+                        CoinGroup.USDT.name -> viewModel.setUsdtGroupMarketCodes(value)
                     }
                 }
             }
             Log.d(TAG,"marketCodesGroup size ${marketCodesGroup.size}")
 
-            viewModel?.getRealTimeStock()
+            viewModel.getRealTimeStock()
         }
     }
 
@@ -250,7 +263,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel?) {
                 ))
             }
 
-            viewModel?.requestRealTimeCoinData(selectedTabIndex)
+            viewModel.requestRealTimeCoinData(selectedTabIndex)
         }
     }
     LaunchedEffect(realTimeCoinCurrentPrice) {
@@ -354,7 +367,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
 }
 
 @Composable
-private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, viewModel: MainViewModel?, onClick: (String)->Unit) {
+private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, viewModel: MainViewModel, onClick: (String)->Unit) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(60.dp)
@@ -370,20 +383,23 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
             .align(Alignment.CenterVertically)
             .weight(.25f, true)) {
             Text(text = coinCurrentPrice.market?.let{
-                viewModel?.getMarketName(it)
+                viewModel.getMarketName(it)
             } ?: "")
-            Text(text = coinCurrentPrice.market?.let {
-                val seperatorSymbol = "/"
-                val results = it.replace("-",seperatorSymbol).split(seperatorSymbol)
-                "${results[1]}$seperatorSymbol${results[0]}"
-            } ?: "")
+            Text(text = viewModel.getMarketCodeToDisplay(coinCurrentPrice.market))
         }
 
-        Box(modifier = Modifier.border(width = 2.dp, color = if (coinCurrentPrice.isNewData == true) textColor else Color.Transparent , shape = RectangleShape)
+        Box(modifier = Modifier
+            .border(
+                width = 2.dp,
+                color = if (coinCurrentPrice.isNewData == true) textColor else Color.Transparent,
+                shape = RectangleShape
+            )
             .weight(.25f, true)
             .fillMaxHeight())
         {
-            Text(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 2.dp), textAlign = TextAlign.End, color = textColor,text = coinCurrentPrice.tradePrice?.let {
+            Text(modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor,text = coinCurrentPrice.tradePrice?.let {
                 DecimalFormat("#,###").format(it.toInt()).toString()
             } ?: "")
 
@@ -432,7 +448,7 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
 private fun MainPreview() {
     StockAppTheme {
         Surface {
-            Main(rememberNavController(),null)
+            Main(rememberNavController(), hiltViewModel())
         }
     }
 }

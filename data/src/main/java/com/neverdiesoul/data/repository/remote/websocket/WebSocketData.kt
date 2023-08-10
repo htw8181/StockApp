@@ -9,9 +9,25 @@ object WebSocketConstants {
 }
 
 data class UpbitTicket(val ticket: String)
+enum class RealTimeDataType(val type: String) {
+    /**
+     * 현재가
+     */
+    TICKER("ticker"),
+
+    /**
+     * 호가
+     */
+    ORDERBOOK("orderbook"),
+
+    /**
+     * 체결
+     */
+    TRADE("trade")
+}
 data class UpbitType(val type: String, val codes: List<String>)
 
-data class UpbitWebSocketResponseData (
+data class UpbitRealTimeCoinCurrentPrice (
     /**
      * 타입 (ticker - 현재가, trade - 체결, orderbook - 호가, myTrade - 내 체결)
      */

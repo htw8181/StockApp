@@ -69,8 +69,9 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
         }
     }
 
-    override fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>) {
-        val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType("ticker", marketCodes.map { it.market })))
+    override fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>) {
+        val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType(
+            dataType, marketCodes.map { it.market })))
         Log.d(tag,"sendWebSocket : $sendData")
         //socket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
         socket.send(sendData)

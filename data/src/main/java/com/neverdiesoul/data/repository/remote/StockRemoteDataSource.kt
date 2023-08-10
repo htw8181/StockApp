@@ -10,6 +10,6 @@ interface StockRemoteDataSource {
     fun getCoinMarketCodeAllFromRemote(): Flow<List<ResponseCoinMarketCode>>
     fun getRealTimeStock(webSocketListener: WebSocketListener)
     fun closeRealTimeStock()
-    fun requestRealTimeCoinData(marketCodes: List<CoinMarketCode>)
+    fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>)
     fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<ResponseCoinCurrentPrice>>
 }
