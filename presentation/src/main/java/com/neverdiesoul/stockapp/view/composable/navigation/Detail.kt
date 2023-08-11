@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -76,7 +77,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel?, coinMa
                 TabRow(selectedTabIndex = selectedTabIndex,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .wrapContentHeight(),
                     containerColor = Color(red = 9, green = 54, blue = 135), //탭 백그라운드 컬러
                     tabs = {
                         enumValues<TabGroup>().forEachIndexed { tabIndex, tabValue ->
