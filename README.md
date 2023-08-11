@@ -91,6 +91,9 @@
   1. MainViewModel을 BaseRealTimeViewModel과 분리(확장 및 재사용을 위해)
   2. 메인화면 실시간 코인 정보 리스트 항목 클릭시 상세화면으로 이동 처리(navController.navigate). 상세화면은 추후 개발 예정
   3. 메인화면 실시간 코인 정보 수신 처리 개선 중..(실시간 데이터가 연속으로 똑같은게 들어올때가 있어서 ,이전 데이터를 저장했다가 새로 데이터가 들어올때 비교해서 다를때에만 emit하도록 함)
+  4. Navigation에서 다음 화면으로 reference argument를 넘길때, currentBackStackEntry.savedStateHandle.set메소드를 이용하는데,
+     set 메소드 내부를 보니, ACCEPTABLE_CLASSES 배열 안에 정의된 자료형이 아니면, IllegalArgumentException을 발생시킨다.
+     이에 따라, Navigation에서 reference argument로써 데이터 클래스를 넘기기 위해 Parcelable을 적용함.
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
