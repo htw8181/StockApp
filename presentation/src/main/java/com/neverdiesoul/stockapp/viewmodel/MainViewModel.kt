@@ -60,6 +60,11 @@ class MainViewModel @Inject constructor(
     private var btcGroupMarketCodes = listOf<CoinMarketCode>()
     private var usdtGroupMarketCodes = listOf<CoinMarketCode>()
 
+    /**
+     * 실시간 데이터가 연속으로 똑같은게 들어올때가 있어서 ,이전 데이터를 저장했다가 새로 데이터가 들어올때 비교해서 다를때에만 emit하도록 함
+     */
+    private var previousRealTimeCoinCurrentPrice = CoinCurrentPriceForMainView()
+    
     fun setKrwGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
         this.krwGroupMarketCodes = marketCodes
     }
@@ -78,6 +83,45 @@ class MainViewModel @Inject constructor(
 
         Log.d(tag, "$funcName ${data.code}")
         var logMsg = "Empty"
+        /*if (data.code == "KRW-BTC") {
+            logMsg = "${MainViewModel::class.simpleName} (1)KRW-BTC 현재가 ${data.tradePrice?.let {
+                DecimalFormat("#,###").format(it.toInt()).toString()
+            } ?: ""} 전일대비 ${data.changeRate?.let{
+                val changeSymbol = when(data.change) {
+                    "RISE" -> "+"
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                    if (result == "0") "0.00" else result
+                }
+                "$changeSymbol${changeRate}%"
+            } ?: ""} ${data.changePrice?.let {
+                val changeSymbol = when(data.change) {
+                    "FALL" -> "-"
+                    else -> ""
+                }
+                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                    if (result == "0") "0.0000" else result
+                }
+                "$changeSymbol$changePrice"
+            } ?: ""} 거래대금 ${data.accTradePrice24h?.let {
+                val result = (it.toDouble() / 100000) * 0.1
+                "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
+            } ?: ""}"
+            Log.d(tag,logMsg)
+        }*/
+
+        val coinCurrentPriceForMainView = CoinCurrentPriceForMainView(
+            market = data.code,
+            tradePrice = data.tradePrice,
+            changeRate = data.changeRate,
+            change = data.change,
+            changePrice = data.changePrice,
+            accTradePrice24h = data.accTradePrice24h,
+            isNewData = true
+        )
+
         if (data.code == "KRW-BTC") {
             logMsg = "${MainViewModel::class.simpleName} (1)KRW-BTC 현재가 ${data.tradePrice?.let {
                 DecimalFormat("#,###").format(it.toInt()).toString()
@@ -107,16 +151,17 @@ class MainViewModel @Inject constructor(
             Log.d(tag,logMsg)
         }
 
+        // 데이터 클래스끼리는 == 으로 비교해도 주생성자로 받은 프로퍼티끼리(클래스 자료형은 제외) 구조적 동등성을 비교한다.
+        if (previousRealTimeCoinCurrentPrice == coinCurrentPriceForMainView) {
+            if (data.code == "KRW-BTC") Log.d(tag, "${MainViewModel::class.simpleName} (1)${coinCurrentPriceForMainView.market}  현재가 coinCurrentPriceForMainView == previousRealTimeCoinCurrentPrice")
+            //Log.d(tag, "${MainViewModel::class.simpleName} (1)${coinCurrentPriceForMainView.market}  현재가 $coinCurrentPriceForMainView == $previousRealTimeCoinCurrentPrice")
+            return
+        }
+
+        previousRealTimeCoinCurrentPrice = coinCurrentPriceForMainView
+
         viewModelScope.launch {
-            _sharedFlow.emit(CoinCurrentPriceForMainView(
-                market = data.code,
-                tradePrice = data.tradePrice,
-                changeRate = data.changeRate,
-                change = data.change,
-                changePrice = data.changePrice,
-                accTradePrice24h = data.accTradePrice24h,
-                isNewData = true
-            ))
+            _sharedFlow.emit(coinCurrentPriceForMainView)
         }
     }
 

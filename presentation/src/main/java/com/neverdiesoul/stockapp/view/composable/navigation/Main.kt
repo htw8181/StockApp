@@ -79,10 +79,10 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
 
     val coinCurrentPrices: List<CoinCurrentPrice> by viewModel.coinCurrentPrices.observeAsState(initial = mutableListOf())
 
-    val realTimeCoinCurrentPrice by viewModel.sharedFlow.collectAsState(initial = null)
-    /*var realTimeCoinCurrentPrice: CoinCurrentPriceForMainView? by remember {
+    //val realTimeCoinCurrentPrice by viewModel.sharedFlow.collectAsState(initial = null)
+    var realTimeCoinCurrentPrice: CoinCurrentPriceForMainView? by remember {
         mutableStateOf(null)
-    }*/
+    }
 
     val coinCurrentPriceForMainViewList = remember {
         mutableStateListOf<CoinCurrentPriceForMainView>()
@@ -313,13 +313,13 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
     }
 
     LaunchedEffect(Unit) {
-        /*viewModel?.sharedFlow?.collect { coinData->
+        viewModel.sharedFlow.collect { coinData->
             //Log.d(TAG, "sendRealTimeCoinCurrentPriceToMain ${coinData.market}")
-            if (coinData?.market == "KRW-BTC") {
-                Log.d("$funcName","$funcName          (2)KRW-BTC 현재가 ${coinData?.tradePrice?.let {
+            if (coinData.market == "KRW-BTC") {
+                Log.d("$funcName","$funcName          (2)KRW-BTC 현재가123 ${coinData.tradePrice?.let {
                     DecimalFormat("#,###").format(it.toInt()).toString()
-                } ?: ""} 전일대비 ${coinData?.changeRate?.let{
-                    val changeSymbol = when(coinData?.change) {
+                } ?: ""} 전일대비 ${coinData.changeRate?.let{
+                    val changeSymbol = when(coinData.change) {
                         "RISE" -> "+"
                         "FALL" -> "-"
                         else -> ""
@@ -328,8 +328,8 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                         if (result == "0") "0.00" else result
                     }
                     "$changeSymbol${changeRate}%"
-                } ?: ""} ${coinData?.changePrice?.let {
-                    val changeSymbol = when(coinData?.change) {
+                } ?: ""} ${coinData.changePrice?.let {
+                    val changeSymbol = when(coinData.change) {
                         "FALL" -> "-"
                         else -> ""
                     }
@@ -337,14 +337,14 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                         if (result == "0") "0.0000" else result
                     }
                     "$changeSymbol$changePrice"
-                } ?: ""} 거래대금 ${coinData?.accTradePrice24h?.let {
+                } ?: ""} 거래대금 ${coinData.accTradePrice24h?.let {
                     val result = (it.toDouble() / 100000) * 0.1
                     "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
                 } ?: ""}")
             }
             //coinData까지는 정상 수신이 되나, 이를 compose state에 전달하면 state가 모두 받아내지 못하고 몇몇을 skip하고 있다..
             realTimeCoinCurrentPrice = coinData
-        }*/
+        }
     }
 }
 
