@@ -161,3 +161,54 @@ data class UpbitRealTimeCoinCurrentPrice (
      */
     @SerializedName("stream_type"           ) val streamType         : String?  = null
 )
+
+data class UpbitRealTimeCoinOrderBookPrice (
+    /**
+     * 타입 orderbook : 호가
+     */
+    @SerializedName("type"            ) val type           : String?                   = null,
+    /**
+     * 마켓 코드 (ex. KRW-BTC)
+     */
+    @SerializedName("code"            ) val code           : String?                   = null,
+    /**
+     * 호가 매도 총 잔량
+     */
+    @SerializedName("total_ask_size"  ) val totalAskSize   : Double?                   = null,
+    /**
+     * 호가 매수 총 잔량
+     */
+    @SerializedName("total_bid_size"  ) val totalBidSize   : Double?                   = null,
+    /**
+     * 호가 리스트
+     */
+    @SerializedName("orderbook_units" ) val orderbookUnits : MutableList<OrderbookUnit> = mutableListOf(),
+    /**
+     * 타임스탬프 (millisecond)
+     */
+    @SerializedName("timestamp"       ) val timestamp      : Long?                      = null,
+    /**
+     * 스트림 타입(SNAPSHOT - 스냅샷, REALTIME - 실시간)
+     */
+    @SerializedName("stream_type"     ) val streamType     : String?                   = null
+
+)
+
+data class OrderbookUnit (
+    /**
+     * 매도 호가
+     */
+    @SerializedName("ask_price" ) val askPrice : Double? = null,
+    /**
+     * 매수 호가
+     */
+    @SerializedName("bid_price" ) val bidPrice : Double? = null,
+    /**
+     * 매도 잔량
+     */
+    @SerializedName("ask_size"  ) val askSize  : Double? = null,
+    /**
+     * 매수 잔량
+     */
+    @SerializedName("bid_size"  ) val bidSize  : Double? = null
+)

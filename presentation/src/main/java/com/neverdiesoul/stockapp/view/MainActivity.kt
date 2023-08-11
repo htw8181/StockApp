@@ -7,14 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.view.composable.navigation.Detail
 import com.neverdiesoul.stockapp.view.composable.navigation.Intro
@@ -56,13 +56,12 @@ private fun MainScreen(modifier: Modifier = Modifier) {
             Main(navController, hiltViewModel<MainViewModel>())
         }
 
-        composable(NavRoutes.Detail.route+"/{marketCode}/{marketName}",
-            arguments = listOf(navArgument("marketCode",{ type = NavType.StringType}),
-                navArgument("marketName",{ type = NavType.StringType})))
-        { backStackEntry ->
-            val marketCode = backStackEntry.arguments?.getString("marketCode")
-            val marketName = backStackEntry.arguments?.getString("marketName")
-            Detail(navController, hiltViewModel<DetailViewModel>(), marketCode, marketName)
+        composable(NavRoutes.Detail.route) {
+            val coinMarketCode = remember {
+                navController.previousBackStackEntry?.savedStateHandle?.get<CoinMarketCode>("coinMarketCode")
+            }?.let {
+                Detail(navController, hiltViewModel<DetailViewModel>(), it)
+            }
         }
     }
 }

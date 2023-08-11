@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -56,11 +55,11 @@ import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
-import com.neverdiesoul.stockapp.viewmodel.CoinGroup
-import com.neverdiesoul.stockapp.viewmodel.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinCurrentPriceForMainView
-import com.neverdiesoul.stockapp.viewmodel.NONE_STATE
+import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinGroup
+import com.neverdiesoul.stockapp.viewmodel.MainViewModel.Companion.KRW_STATE
+import com.neverdiesoul.stockapp.viewmodel.MainViewModel.Companion.NONE_STATE
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -130,11 +129,8 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
             Row(modifier = Modifier.padding(10.dp)) {
                 val selectedColor = Color(red = 9, green = 54, blue = 135)
                 TabRow(selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .border(width = 1.dp, color = Color.Gray, shape = RectangleShape),
+                    modifier = Modifier.fillMaxWidth(0.5f).border(width = 1.dp, color = Color.Gray, shape = RectangleShape),
                     containerColor = Color.White,
-                    contentColor = Color.Black,
                     tabs = {
                         enumValues<CoinGroup>().forEachIndexed { marketCodeIndex, marketCodeName ->
                             Tab(modifier = Modifier
@@ -182,11 +178,12 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                 .fillMaxWidth())
 
             LazyColumn {
-                val onListItemClick = { market: String ->
-                    Toast.makeText(context,market, Toast.LENGTH_SHORT).show()
+                val onListItemClick = { coinMarketCode: CoinMarketCode ->
+                    Toast.makeText(context, coinMarketCode.market, Toast.LENGTH_SHORT).show()
                     // TODO 웹소켓 닫고 가야 한다.
                     viewModel.closeRealTimeStock()
-                    navController.navigate(NavRoutes.Detail.route + "/$market/${viewModel.getMarketName(market)}") {
+                    navController.currentBackStackEntry?.savedStateHandle?.set(key = "coinMarketCode", value = coinMarketCode)
+                    navController.navigate(NavRoutes.Detail.route) {
                         launchSingleTop = true
                     }
                 }
@@ -367,12 +364,17 @@ private fun BottomNavigationBar(navController: NavHostController) {
 }
 
 @Composable
-private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, viewModel: MainViewModel, onClick: (String)->Unit) {
+private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, viewModel: MainViewModel, onClick: (CoinMarketCode)->Unit) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .height(60.dp)
+        .height(50.dp)
         .padding(start = 10.dp, end = 10.dp)
-        .clickable { onClick(coinCurrentPrice.market ?: "") })
+        .clickable {
+            viewModel.getMarketCodes()?.find { it.market == coinCurrentPrice.market}?.let {
+                onClick(it)
+            }
+        }
+    )
     {
         val textColor: Color = when(coinCurrentPrice.change) {
             "RISE" -> Color.Red

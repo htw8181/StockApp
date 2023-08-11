@@ -94,6 +94,9 @@
   4. Navigation에서 다음 화면으로 reference argument를 넘길때, currentBackStackEntry.savedStateHandle.set메소드를 이용하는데,
      set 메소드 내부를 보니, ACCEPTABLE_CLASSES 배열 안에 정의된 자료형이 아니면, IllegalArgumentException을 발생시킨다.
      이에 따라, Navigation에서 reference argument로써 데이터 클래스를 넘기기 위해 Parcelable을 적용함.
+- 2023년 8월 12일
+  1. 상세화면 진입시 해당 마켓코드로 웹소켓 통신(실시간 호가)하도록 로직 적용
+  2. 상세화면 UI 프레임 구성 - 메인화면 처럼 Scaffold 기준으로 세웠으며, 컨텐츠 영역에 Tab,LazyColumn,Input Component(Slot Composable)을 구성함
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요

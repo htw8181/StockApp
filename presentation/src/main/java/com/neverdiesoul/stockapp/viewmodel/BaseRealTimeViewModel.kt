@@ -81,4 +81,11 @@ abstract class BaseRealTimeViewModel (
             viewModel.viewEvent?.viewOnReady()
         }
     }
+
+    override fun onCleared() {
+        tryConnectionToGetRealTimeCoinDataUseCase.closeRealTimeStock()
+        Log.d(tag,"RealTimeStock 통신 닫힘")
+
+        super.onCleared()
+    }
 }

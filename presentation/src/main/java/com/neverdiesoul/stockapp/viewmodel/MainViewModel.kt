@@ -27,15 +27,6 @@ import java.text.DecimalFormat
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-enum class CoinGroup {
-    KRW,BTC,USDT
-}
-
-val NONE_STATE = -1
-val KRW_STATE = CoinGroup.KRW.ordinal
-val BTC_STATE = CoinGroup.BTC.ordinal
-val USDT_STATE = CoinGroup.USDT.ordinal
-
 @HiltViewModel
 class MainViewModel @Inject constructor(
         private val getCoinMarketCodeAllFromLocalUseCase: GetCoinMarketCodeAllFromLocalUseCase,
@@ -43,6 +34,16 @@ class MainViewModel @Inject constructor(
         tryConnectionToGetRealTimeCoinDataUseCase: TryConnectionToGetRealTimeCoinDataUseCase,
         requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase
     ) : BaseRealTimeViewModel(tryConnectionToGetRealTimeCoinDataUseCase,requestRealTimeCoinDataUseCase) {
+
+    enum class CoinGroup {
+        KRW,BTC,USDT
+    }
+    companion object {
+        val NONE_STATE = -1
+        val KRW_STATE = CoinGroup.KRW.ordinal
+        val BTC_STATE = CoinGroup.BTC.ordinal
+        val USDT_STATE = CoinGroup.USDT.ordinal
+    }
 
     private var _coinMarketCodes: MutableLiveData<List<CoinMarketCode>> = MutableLiveData(mutableListOf())
     val coinMarketCodes: LiveData<List<CoinMarketCode>> = _coinMarketCodes
@@ -74,6 +75,8 @@ class MainViewModel @Inject constructor(
     fun setUsdtGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
         this.usdtGroupMarketCodes = marketCodes
     }
+
+    fun getMarketCodes() = this.coinMarketCodes.value
 
     override fun sendRealTimeCoinDataToView(bytes: ByteString) {
         val funcName = object{}.javaClass.enclosingMethod?.name
@@ -265,12 +268,5 @@ class MainViewModel @Inject constructor(
                 requestRealTimeCoinDataUseCase(dataType, usdtGroupMarketCodes)
             }
         }
-    }
-
-    override fun onCleared() {
-        tryConnectionToGetRealTimeCoinDataUseCase.closeRealTimeStock()
-        Log.d(tag,"RealTimeStock 통신 닫힘")
-
-        super.onCleared()
     }
 }
