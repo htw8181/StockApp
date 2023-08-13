@@ -117,10 +117,6 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                 bottom = paddingValues.calculateBottomPadding()
             ))
         {
-            /**
-             * TODO
-             * 1. 실시간 코인 데이터를 LazyColumn 으로 구성
-             */
             Spacer(modifier = Modifier
                 .background(color = Color(red = 9, green = 54, blue = 135))
                 .height(3.dp)
@@ -263,6 +259,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
             viewModel.requestRealTimeCoinData(selectedTabIndex)
         }
     }
+
     LaunchedEffect(realTimeCoinCurrentPrice) {
         if (realTimeCoinCurrentPrice == null) return@LaunchedEffect
 
@@ -401,8 +398,8 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
         {
             Text(modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor,text = coinCurrentPrice.tradePrice?.let {
-                DecimalFormat("#,###").format(it.toInt()).toString()
+                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor, text = coinCurrentPrice.tradePrice?.let {
+                DecimalFormat("#,###.####").format(it).toString()
             } ?: "")
 
         }

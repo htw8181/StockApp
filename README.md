@@ -97,6 +97,8 @@
 - 2023년 8월 12일
   1. 상세화면 진입시 해당 마켓코드로 웹소켓 통신(실시간 호가)하도록 로직 적용
   2. 상세화면 UI 프레임 구성 - 메인화면 처럼 Scaffold 기준으로 세웠으며, 컨텐츠 영역에 Tab,LazyColumn,Input Component(Slot Composable)을 구성함
+- 2023년 8월 14일
+  1. 상세화면 진입시 해당 마켓코드로 현재가 조회(Retrofit API) 후 웹소켓 통신(실시간 호가)하여 LazyColumn으로 실시간 호가 리스트 업데이트 처리 로직 적용
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
@@ -106,3 +108,10 @@
   - 이 건은 취소 한다. DAO 함수(Select 쿼리문) 반환형을 Flow로 적용하면, DB데이터가 바뀔때마다 자동으로 호출되는데,
     현재 앱에서는 굳이 필요할 것 같지 않아 추후, 필요시에 검토해서 적용하려 함. 
   - 반환형을 Flow로 적용하니까, collect 후에 onCompletion 메소드가 호출되지 않는게 찜찜하다..
+  * plugin을 compose로 찾아보니, 몇몇 쓸만한 것들이 눈에 띈다. 
+  - Compose Modifiers Playground -> compose modifier 들을 바꿔가며 각 속성들이 뭐하는 것인지 알려줌
+  - HTML to compose web converter -> HTML 코드를 compose 코드로 컨버젼 해주는 것
+  * 디자인 탭에서 육안으로 보이는 것을 더블 클릭하여, 해당 컴포넌트 소스 위치를 알 수 있지만..
+    디자인 탭에서는 컴포넌트들이 겹치거나 하는 등으로 잘 보이지 않고, 실제 화면상에서만 확인할 수 있는 소스 상의 composable 함수들이 어디에 위치하는지 궁금할때엔, 
+    Layout Inspector를 적극 활용하자.
+  - Layout Inspector에 보이는 컴포넌트 트리 상에서 원하는 컴포넌트를 더블 클릭하면 해당 composable 함수로 이동해준다.

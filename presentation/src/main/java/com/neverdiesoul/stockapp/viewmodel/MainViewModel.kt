@@ -205,7 +205,7 @@ class MainViewModel @Inject constructor(
                 .catch { Log.d(tag,"Error!! $funcName -> $it") }
                 .collect { coinCurrentPriceList ->
                     coinCurrentPriceList.forEach { coinCurrentPrice ->
-                        Log.d(tag, "$funcName collect data -> ${coinCurrentPrice.toString()}")
+                        Log.d(tag, "$funcName collect data -> $coinCurrentPrice")
                     }
                     _coinCurrentPrices.value = coinCurrentPriceList.sortedByDescending { it.accTradePrice24h }
                 }

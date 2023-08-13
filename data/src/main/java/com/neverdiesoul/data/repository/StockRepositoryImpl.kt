@@ -2,10 +2,12 @@ package com.neverdiesoul.data.repository
 
 import android.util.Log
 import com.neverdiesoul.data.mapper.Mapper.toDomainCoinCurrentPrice
+import com.neverdiesoul.data.mapper.Mapper.toDomainCoinOrderBookPrice
 import com.neverdiesoul.data.repository.local.StockLocalDataSource
 import com.neverdiesoul.data.repository.remote.StockRemoteDataSource
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.model.CoinOrderBookPrice
 import com.neverdiesoul.domain.repository.StockRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -80,6 +82,12 @@ class StockRepositoryImpl @Inject constructor(
     override fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<CoinCurrentPrice>> = flow {
         stockRemoteDataSource.getCoinCurrentPriceFromRemote(markets).collect {
             emit(it.toDomainCoinCurrentPrice())
+        }
+    }
+
+    override fun getCoinOrderBookPriceFromRemote(markets: List<String>): Flow<List<CoinOrderBookPrice>> = flow {
+        stockRemoteDataSource.getCoinOrderBookPriceFromRemote(markets).collect {
+            emit(it.toDomainCoinOrderBookPrice())
         }
     }
 }

@@ -2,6 +2,7 @@ package com.neverdiesoul.domain.repository
 
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.model.CoinOrderBookPrice
 import kotlinx.coroutines.flow.Flow
 import okhttp3.WebSocketListener
 
@@ -12,4 +13,5 @@ interface StockRepository {
     fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>>
     fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>)
     fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<CoinCurrentPrice>>
+    fun getCoinOrderBookPriceFromRemote(markets: List<String>): Flow<List<CoinOrderBookPrice>>
 }

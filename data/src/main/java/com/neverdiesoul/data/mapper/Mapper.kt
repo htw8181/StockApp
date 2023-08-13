@@ -2,9 +2,13 @@ package com.neverdiesoul.data.mapper
 
 import com.neverdiesoul.data.db.entity.CoinMarketCodeEntity
 import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
+import com.neverdiesoul.data.model.ResponseCoinOrderBookPrice
 
 typealias CoinMarketCodeToDomain = com.neverdiesoul.domain.model.CoinMarketCode
 typealias CoinCurrentPriceToDomain = com.neverdiesoul.domain.model.CoinCurrentPrice
+typealias CoinOrderBookPriceToDomain = com.neverdiesoul.domain.model.CoinOrderBookPrice
+typealias CoinOrderBookUnitToDomain = com.neverdiesoul.domain.model.CoinOrderBookUnit
+
 object Mapper {
     fun List<CoinMarketCodeEntity>.toDomainCoinMarketCode(): List<CoinMarketCodeToDomain> {
         return this.map {
@@ -41,6 +45,24 @@ object Mapper {
                 lowest52WeekPrice = it.lowest52WeekPrice,
                 lowest52WeekDate = it.lowest52WeekDate,
                 timestamp = it.timestamp)
+        }
+    }
+    fun List<ResponseCoinOrderBookPrice>.toDomainCoinOrderBookPrice(): List<CoinOrderBookPriceToDomain> {
+        return this.map { coinOrderBookPrice->
+            CoinOrderBookPriceToDomain(
+                market = coinOrderBookPrice.market,
+                timestamp = coinOrderBookPrice.timestamp,
+                totalAskSize = coinOrderBookPrice.totalAskSize,
+                totalBidSize = coinOrderBookPrice.totalBidSize,
+                orderbookUnits = coinOrderBookPrice.coinOrderBookUnits.map {
+                    CoinOrderBookUnitToDomain(
+                        askPrice = it.askPrice,
+                        bidPrice = it.bidPrice,
+                        askSize = it.askSize,
+                        bidSize = it.bidSize
+                    )
+                }
+            )
         }
     }
 }

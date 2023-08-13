@@ -6,6 +6,7 @@ import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.api.ApiInterface
 import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
+import com.neverdiesoul.data.model.ResponseCoinOrderBookPrice
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
 import com.neverdiesoul.data.repository.remote.websocket.UpbitType
 import com.neverdiesoul.domain.model.CoinMarketCode
@@ -85,7 +86,7 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
                 if (response.isSuccessful) {
                     response.body()?.let { 
                         it.forEach { responseCoinCurrentPrice ->
-                            Log.d(tag, "$funcName collect data -> ${responseCoinCurrentPrice.toString()}")
+                            Log.d(tag, "$funcName collect data -> $responseCoinCurrentPrice")
                         }
                         emit(it)
                     }
@@ -94,6 +95,27 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
                 }
             } catch (e: Exception) {
                 Log.d(tag, "코인 현재가 수신 에러 ${e.message}")
+            }
+        }
+    }
+
+    override fun getCoinOrderBookPriceFromRemote(markets: List<String>): Flow<List<ResponseCoinOrderBookPrice>> {
+        val funcName = object{}.javaClass.enclosingMethod.name
+        return flow {
+            try {
+                val response = retrofitService.getCoinOrderBookPriceFromRemote(markets)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        it.forEach { responseCoinOrderBookPrice ->
+                            Log.d(tag, "$funcName collect data -> $responseCoinOrderBookPrice")
+                        }
+                        emit(it)
+                    }
+                } else {
+                    Log.d(tag, "코인 호가 수신 에러 ${response.code()} : ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.d(tag, "코인 호가 수신 에러 ${e.message}")
             }
         }
     }

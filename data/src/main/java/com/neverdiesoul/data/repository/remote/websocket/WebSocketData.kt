@@ -191,7 +191,6 @@ data class UpbitRealTimeCoinOrderBookPrice (
      * 스트림 타입(SNAPSHOT - 스냅샷, REALTIME - 실시간)
      */
     @SerializedName("stream_type"     ) val streamType     : String?                   = null
-
 )
 
 data class OrderbookUnit (
