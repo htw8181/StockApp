@@ -9,10 +9,12 @@ import com.neverdiesoul.data.repository.remote.websocket.RealTimeDataType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.model.UpbitType
 import com.neverdiesoul.domain.usecase.GetCoinCurrentPriceFromRemoteUseCase
 import com.neverdiesoul.domain.usecase.GetCoinMarketCodeAllFromLocalUseCase
 import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
 import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
+import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -51,7 +53,7 @@ class MainViewModel @Inject constructor(
     private var _coinCurrentPrices: MutableLiveData<List<CoinCurrentPrice>> = MutableLiveData(mutableListOf())
     val coinCurrentPrices: LiveData<List<CoinCurrentPrice>> = _coinCurrentPrices
 
-    private val _sharedFlow = MutableSharedFlow<CoinCurrentPriceForMainView>(
+    private val _sharedFlow = MutableSharedFlow<CoinCurrentPriceForView>(
         /*replay = 10,
         onBufferOverflow = BufferOverflow.DROP_OLDEST*/
     )
@@ -64,7 +66,7 @@ class MainViewModel @Inject constructor(
     /**
      * 실시간 데이터가 연속으로 똑같은게 들어올때가 있어서 ,이전 데이터를 저장했다가 새로 데이터가 들어올때 비교해서 다를때에만 emit하도록 함
      */
-    private var previousRealTimeCoinCurrentPrice = CoinCurrentPriceForMainView()
+    private var previousRealTimeCoinCurrentPrice = CoinCurrentPriceForView()
     
     fun setKrwGroupMarketCodes(marketCodes: List<CoinMarketCode>) {
         this.krwGroupMarketCodes = marketCodes
@@ -115,7 +117,7 @@ class MainViewModel @Inject constructor(
             Log.d(tag,logMsg)
         }*/
 
-        val coinCurrentPriceForMainView = CoinCurrentPriceForMainView(
+        val coinCurrentPriceForView = CoinCurrentPriceForView(
             market = data.code,
             tradePrice = data.tradePrice,
             changeRate = data.changeRate,
@@ -155,16 +157,16 @@ class MainViewModel @Inject constructor(
         }
 
         // 데이터 클래스끼리는 == 으로 비교해도 주생성자로 받은 프로퍼티끼리(클래스 자료형은 제외) 구조적 동등성을 비교한다.
-        if (previousRealTimeCoinCurrentPrice == coinCurrentPriceForMainView) {
-            if (data.code == "KRW-BTC") Log.d(tag, "${MainViewModel::class.simpleName} (1)${coinCurrentPriceForMainView.market}  현재가 coinCurrentPriceForMainView == previousRealTimeCoinCurrentPrice")
+        if (previousRealTimeCoinCurrentPrice == coinCurrentPriceForView) {
+            if (data.code == "KRW-BTC") Log.d(tag, "${MainViewModel::class.simpleName} (1)${coinCurrentPriceForView.market}  현재가 coinCurrentPriceForMainView == previousRealTimeCoinCurrentPrice")
             //Log.d(tag, "${MainViewModel::class.simpleName} (1)${coinCurrentPriceForMainView.market}  현재가 $coinCurrentPriceForMainView == $previousRealTimeCoinCurrentPrice")
             return
         }
 
-        previousRealTimeCoinCurrentPrice = coinCurrentPriceForMainView
+        previousRealTimeCoinCurrentPrice = coinCurrentPriceForView
 
         viewModelScope.launch {
-            _sharedFlow.emit(coinCurrentPriceForMainView)
+            _sharedFlow.emit(coinCurrentPriceForView)
         }
     }
 
@@ -212,40 +214,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 메인 화면 리스트에 보여줄 코인 현재가 정보
-     */
-    data class CoinCurrentPriceForMainView(
-        /**
-         * 종목 구분 코드
-         */
-        val market             : String? = null,
-        /**
-         * 종가(현재가)
-         */
-        var tradePrice         : Double?    = null,
-        /**
-         * 변화율의 절대값
-         */
-        var changeRate         : Double? = null,
-        /**
-         * EVEN : 보합, RISE : 상승, FALL : 하락
-         */
-        var change             : String? = null,
-        /**
-         * 변화액의 절대값
-         */
-        var changePrice        : BigDecimal?    = null,
-        /**
-         * 24시간 누적 거래대금
-         */
-        var accTradePrice24h   : BigDecimal? = null,
-        /**
-         * 실시간으로 새로 들어온 데이터 인지 여부
-         */
-        var isNewData          : Boolean? = false
-    )
-
     fun getMarketName(marketCode: String): String {
         coinMarketCodes.value?.forEach { coinMarketCode ->
             if (marketCode == coinMarketCode.market) {
@@ -259,13 +227,13 @@ class MainViewModel @Inject constructor(
         val dataType = RealTimeDataType.TICKER.type
         when(selectedTabIndex) {
             KRW_STATE -> {
-                requestRealTimeCoinDataUseCase(dataType, krwGroupMarketCodes)
+                requestRealTimeCoinDataUseCase(listOf(UpbitType(dataType, krwGroupMarketCodes.map { it.market })))
             }
             BTC_STATE -> {
-                requestRealTimeCoinDataUseCase(dataType, btcGroupMarketCodes)
+                requestRealTimeCoinDataUseCase(listOf(UpbitType(dataType, btcGroupMarketCodes.map { it.market })))
             }
             USDT_STATE -> {
-                requestRealTimeCoinDataUseCase(dataType, usdtGroupMarketCodes)
+                requestRealTimeCoinDataUseCase(listOf(UpbitType(dataType, usdtGroupMarketCodes.map { it.market })))
             }
         }
     }

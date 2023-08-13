@@ -6,13 +6,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.neverdiesoul.data.repository.remote.websocket.RealTimeDataType
+import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinCurrentPrice
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinOrderBookPrice
+import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeDataType
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
+import com.neverdiesoul.domain.model.UpbitType
 import com.neverdiesoul.domain.usecase.GetCoinOrderBookPriceFromRemoteUseCase
 import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
 import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
 import com.neverdiesoul.stockapp.R
+import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -33,11 +37,17 @@ class DetailViewModel @Inject constructor(
     private var _coinOrderBookPrices: MutableLiveData<List<CoinOrderBookPrice>> = MutableLiveData(mutableListOf())
     val coinOrderBookPrices: LiveData<List<CoinOrderBookPrice>> = _coinOrderBookPrices
 
-    private val _sharedFlow = MutableSharedFlow<UpbitRealTimeCoinOrderBookPrice>(
+    private val _coinCurrentPriceForViewSharedFlow = MutableSharedFlow<CoinCurrentPriceForView>(
         /*replay = 10,
         onBufferOverflow = BufferOverflow.DROP_OLDEST*/
     )
-    val sharedFlow = _sharedFlow.asSharedFlow()
+    val coinCurrentPriceForViewSharedFlow = _coinCurrentPriceForViewSharedFlow.asSharedFlow()
+
+    private val _coinOrderBookPriceForViewSharedFlow = MutableSharedFlow<UpbitRealTimeCoinOrderBookPrice>(
+        /*replay = 10,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST*/
+    )
+    val coinOrderBookPriceForViewSharedFlow = _coinOrderBookPriceForViewSharedFlow.asSharedFlow()
 
     enum class TabGroup(val resId: Int) {
         ORDER(R.string.detail_tab_order),
@@ -74,18 +84,42 @@ class DetailViewModel @Inject constructor(
     override fun sendRealTimeCoinDataToView(bytes: ByteString) {
         val funcName = object{}.javaClass.enclosingMethod?.name
 
-        val data = Gson().fromJson(bytes.string(Charsets.UTF_8), UpbitRealTimeCoinOrderBookPrice::class.java)
-        Log.d(tag,"DetailViewModel 수신 data => $data")
-
-        Log.d(tag, "$funcName ${data.code}")
-
-        viewModelScope.launch {
-            _sharedFlow.emit(data)
+        val dataType = Gson().fromJson(bytes.string(Charsets.UTF_8), UpbitRealTimeDataType::class.java)
+        when(dataType.type) {
+            RealTimeDataType.TICKER.type -> {
+                val data = Gson().fromJson(bytes.string(Charsets.UTF_8), UpbitRealTimeCoinCurrentPrice::class.java)
+                Log.d(tag,"DetailViewModel 수신 data => $data")
+                val coinCurrentPriceForView = CoinCurrentPriceForView(
+                    market = data.code,
+                    tradePrice = data.tradePrice,
+                    changeRate = data.changeRate,
+                    change = data.change,
+                    changePrice = data.changePrice,
+                    accTradePrice24h = data.accTradePrice24h,
+                    isNewData = true
+                )
+                viewModelScope.launch {
+                    _coinCurrentPriceForViewSharedFlow.emit(coinCurrentPriceForView)
+                }
+            }
+            RealTimeDataType.ORDERBOOK.type -> {
+                val data = Gson().fromJson(bytes.string(Charsets.UTF_8), UpbitRealTimeCoinOrderBookPrice::class.java)
+                Log.d(tag,"DetailViewModel 수신 data => $data")
+                viewModelScope.launch {
+                    _coinOrderBookPriceForViewSharedFlow.emit(data)
+                }
+            }
         }
+
+
+
+
+
+
     }
 
     fun requestRealTimeCoinData(coinMarketCode: CoinMarketCode) {
-        requestRealTimeCoinDataUseCase(RealTimeDataType.ORDERBOOK.type, listOf(coinMarketCode))
+        requestRealTimeCoinDataUseCase(listOf(UpbitType(RealTimeDataType.TICKER.type, listOf(coinMarketCode.market)),UpbitType(RealTimeDataType.ORDERBOOK.type, listOf(coinMarketCode.market))))
     }
 
     /**

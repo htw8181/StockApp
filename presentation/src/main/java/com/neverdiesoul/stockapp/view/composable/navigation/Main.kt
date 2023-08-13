@@ -56,10 +56,10 @@ import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
-import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinCurrentPriceForMainView
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinGroup
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.Companion.KRW_STATE
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.Companion.NONE_STATE
+import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -79,12 +79,12 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
     val coinCurrentPrices: List<CoinCurrentPrice> by viewModel.coinCurrentPrices.observeAsState(initial = mutableListOf())
 
     //val realTimeCoinCurrentPrice by viewModel.sharedFlow.collectAsState(initial = null)
-    var realTimeCoinCurrentPrice: CoinCurrentPriceForMainView? by remember {
+    var realTimeCoinCurrentPrice: CoinCurrentPriceForView? by remember {
         mutableStateOf(null)
     }
 
-    val coinCurrentPriceForMainViewList = remember {
-        mutableStateListOf<CoinCurrentPriceForMainView>()
+    val coinCurrentPriceForViewList = remember {
+        mutableStateListOf<CoinCurrentPriceForView>()
     }
 
     val onTabClick: (Int)->Unit = {
@@ -184,8 +184,8 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                     }
                 }
 
-                items(coinCurrentPriceForMainViewList) { coinCurrentPriceForMainView ->
-                    CurrentPriceItem(coinCurrentPriceForMainView, viewModel, onListItemClick)
+                items(coinCurrentPriceForViewList) { coinCurrentPriceForView ->
+                    CurrentPriceItem(coinCurrentPriceForView, viewModel, onListItemClick)
                     Spacer(modifier = Modifier
                         .background(color = Color(red = 241, green = 241, blue = 244))
                         .height(1.dp)
@@ -244,9 +244,9 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
     LaunchedEffect(coinCurrentPrices) {
         Log.d(TAG,"selectedTabIndex $selectedTabIndex,coinCurrentPrices $coinCurrentPrices changed!!")
         if (!coinCurrentPrices.isNullOrEmpty()) {
-            coinCurrentPriceForMainViewList.clear()
+            coinCurrentPriceForViewList.clear()
             coinCurrentPrices.forEach { coinCurrentPrice->
-                coinCurrentPriceForMainViewList.add(CoinCurrentPriceForMainView(
+                coinCurrentPriceForViewList.add(CoinCurrentPriceForView(
                     market = coinCurrentPrice.market,
                     tradePrice = coinCurrentPrice.tradePrice,
                     changePrice = coinCurrentPrice.changePrice,
@@ -291,14 +291,14 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
             } ?: ""}")
         }
 
-        coinCurrentPriceForMainViewList.forEach { coinCurrentPriceForMainView->
-            if (realTimeCoinCurrentPrice != null && coinCurrentPriceForMainView.market == realTimeCoinCurrentPrice?.market) {
-                coinCurrentPriceForMainView.tradePrice = realTimeCoinCurrentPrice?.tradePrice
-                coinCurrentPriceForMainView.changePrice = realTimeCoinCurrentPrice?.changePrice
-                coinCurrentPriceForMainView.change = realTimeCoinCurrentPrice?.change
-                coinCurrentPriceForMainView.changeRate = realTimeCoinCurrentPrice?.changeRate
-                coinCurrentPriceForMainView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
-                coinCurrentPriceForMainView.isNewData = realTimeCoinCurrentPrice?.isNewData
+        coinCurrentPriceForViewList.forEach { CoinCurrentPriceForView->
+            if (realTimeCoinCurrentPrice != null && CoinCurrentPriceForView.market == realTimeCoinCurrentPrice?.market) {
+                CoinCurrentPriceForView.tradePrice = realTimeCoinCurrentPrice?.tradePrice
+                CoinCurrentPriceForView.changePrice = realTimeCoinCurrentPrice?.changePrice
+                CoinCurrentPriceForView.change = realTimeCoinCurrentPrice?.change
+                CoinCurrentPriceForView.changeRate = realTimeCoinCurrentPrice?.changeRate
+                CoinCurrentPriceForView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
+                CoinCurrentPriceForView.isNewData = realTimeCoinCurrentPrice?.isNewData
                 return@forEach
             }
         }
@@ -361,19 +361,19 @@ private fun BottomNavigationBar(navController: NavHostController) {
 }
 
 @Composable
-private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, viewModel: MainViewModel, onClick: (CoinMarketCode)->Unit) {
+private fun CurrentPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, viewModel: MainViewModel, onClick: (CoinMarketCode)->Unit) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(50.dp)
         .padding(start = 10.dp, end = 10.dp)
         .clickable {
-            viewModel.getMarketCodes()?.find { it.market == coinCurrentPrice.market}?.let {
+            viewModel.getMarketCodes()?.find { it.market == coinCurrentPriceForView.market}?.let {
                 onClick(it)
             }
         }
     )
     {
-        val textColor: Color = when(coinCurrentPrice.change) {
+        val textColor: Color = when(coinCurrentPriceForView.change) {
             "RISE" -> Color.Red
             "FALL" -> Color.Blue
             else -> Color.Black
@@ -381,16 +381,16 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
         Column(modifier = Modifier
             .align(Alignment.CenterVertically)
             .weight(.25f, true)) {
-            Text(text = coinCurrentPrice.market?.let{
+            Text(text = coinCurrentPriceForView.market?.let{
                 viewModel.getMarketName(it)
             } ?: "")
-            Text(text = viewModel.getMarketCodeToDisplay(coinCurrentPrice.market))
+            Text(text = viewModel.getMarketCodeToDisplay(coinCurrentPriceForView.market))
         }
 
         Box(modifier = Modifier
             .border(
                 width = 2.dp,
-                color = if (coinCurrentPrice.isNewData == true) textColor else Color.Transparent,
+                color = if (coinCurrentPriceForView.isNewData == true) textColor else Color.Transparent,
                 shape = RectangleShape
             )
             .weight(.25f, true)
@@ -398,20 +398,20 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
         {
             Text(modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor, text = coinCurrentPrice.tradePrice?.let {
+                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor, text = coinCurrentPriceForView.tradePrice?.let {
                 DecimalFormat("#,###.####").format(it).toString()
             } ?: "")
 
         }
-        if (coinCurrentPrice.isNewData == true) {
-            coinCurrentPrice.isNewData = false
+        if (coinCurrentPriceForView.isNewData == true) {
+            coinCurrentPriceForView.isNewData = false
         }
 
         Column(horizontalAlignment = Alignment.End, modifier = Modifier
             .align(Alignment.CenterVertically)
             .weight(.25f, true)) {
-            Text(color = textColor, text = coinCurrentPrice.changeRate?.let{
-                val changeSymbol = when(coinCurrentPrice.change) {
+            Text(color = textColor, text = coinCurrentPriceForView.changeRate?.let{
+                val changeSymbol = when(coinCurrentPriceForView.change) {
                     "RISE" -> "+"
                     "FALL" -> "-"
                     else -> ""
@@ -421,8 +421,8 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
                 }
                 "$changeSymbol${changeRate}%"
             } ?: "")
-            Text(color = textColor, text = coinCurrentPrice.changePrice?.let {
-                val changeSymbol = when(coinCurrentPrice.change) {
+            Text(color = textColor, text = coinCurrentPriceForView.changePrice?.let {
+                val changeSymbol = when(coinCurrentPriceForView.change) {
                     "FALL" -> "-"
                     else -> ""
                 }
@@ -435,7 +435,7 @@ private fun CurrentPriceItem(coinCurrentPrice: CoinCurrentPriceForMainView, view
         Text(textAlign = TextAlign.End, modifier = Modifier
             .align(Alignment.CenterVertically)
             .weight(.25f, true),
-            text = coinCurrentPrice.accTradePrice24h?.let {
+            text = coinCurrentPriceForView.accTradePrice24h?.let {
                 val result = (it.toDouble() / 100000) * 0.1
                 "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
             } ?: "")

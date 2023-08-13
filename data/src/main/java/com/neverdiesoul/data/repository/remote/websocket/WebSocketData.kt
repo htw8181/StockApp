@@ -25,9 +25,15 @@ enum class RealTimeDataType(val type: String) {
      */
     TRADE("trade")
 }
-data class UpbitType(val type: String, val codes: List<String>)
 
-data class UpbitRealTimeCoinCurrentPrice (
+data class UpbitRealTimeDataType(
+    /**
+     * 타입 (ticker - 현재가, trade - 체결, orderbook - 호가, myTrade - 내 체결)
+     */
+    @SerializedName("type"                  ) val type               : String?  = null
+)
+
+data class UpbitRealTimeCoinCurrentPrice(
     /**
      * 타입 (ticker - 현재가, trade - 체결, orderbook - 호가, myTrade - 내 체결)
      */

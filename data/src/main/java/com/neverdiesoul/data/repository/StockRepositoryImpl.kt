@@ -8,6 +8,7 @@ import com.neverdiesoul.data.repository.remote.StockRemoteDataSource
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
+import com.neverdiesoul.domain.model.UpbitType
 import com.neverdiesoul.domain.repository.StockRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -75,8 +76,8 @@ class StockRepositoryImpl @Inject constructor(
 
     override fun getCoinMarketCodeAllFromLocal(): Flow<List<CoinMarketCode>> = stockLocalDataSource.getCoinMarketCodeAllFromLocal()
 
-    override fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>) {
-        stockRemoteDataSource.requestRealTimeCoinData(dataType, marketCodes)
+    override fun requestRealTimeCoinData(upbitTypeList: List<UpbitType>) {
+        stockRemoteDataSource.requestRealTimeCoinData(upbitTypeList)
     }
 
     override fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<CoinCurrentPrice>> = flow {

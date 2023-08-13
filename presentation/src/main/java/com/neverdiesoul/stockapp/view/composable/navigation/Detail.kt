@@ -163,7 +163,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
             }
         })
         viewModel.getRealTimeStock()
-        viewModel.sharedFlow.collect { coinOrderBookPrice ->
+        viewModel.coinOrderBookPriceForViewSharedFlow.collect { coinOrderBookPrice ->
             realTimeCoinOrderBookPrice = coinOrderBookPrice
         }
     }

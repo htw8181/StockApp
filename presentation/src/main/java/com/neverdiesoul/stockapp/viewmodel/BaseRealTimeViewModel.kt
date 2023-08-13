@@ -15,8 +15,6 @@ abstract class BaseRealTimeViewModel (
 ) : ViewModel() {
     protected val tag = this::class.simpleName
 
-    protected var webSocket: WebSocket? = null
-
     fun getRealTimeStock() {
         tryConnectionToGetRealTimeCoinDataUseCase.setWebSocketListener(RealTimeStockListener(this))
         tryConnectionToGetRealTimeCoinDataUseCase()
@@ -77,7 +75,6 @@ abstract class BaseRealTimeViewModel (
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
-            viewModel.webSocket = webSocket
             viewModel.viewEvent?.viewOnReady()
         }
     }

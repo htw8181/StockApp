@@ -8,8 +8,7 @@ import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
 import com.neverdiesoul.data.model.ResponseCoinOrderBookPrice
 import com.neverdiesoul.data.repository.remote.websocket.UpbitTicket
-import com.neverdiesoul.data.repository.remote.websocket.UpbitType
-import com.neverdiesoul.domain.model.CoinMarketCode
+import com.neverdiesoul.domain.model.UpbitType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -70,9 +69,12 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
         }
     }
 
-    override fun requestRealTimeCoinData(dataType: String, marketCodes: List<CoinMarketCode>) {
-        val sendData = Gson().toJson(listOf(UpbitTicket(UUID.randomUUID().toString()), UpbitType(
-            dataType, marketCodes.map { it.market })))
+    override fun requestRealTimeCoinData(upbitTypeList: List<UpbitType>) {
+        val params: MutableList<Any> = mutableListOf(UpbitTicket(UUID.randomUUID().toString()))
+        upbitTypeList.forEach {
+            params.add(it)
+        }
+        val sendData = Gson().toJson(params)
         Log.d(tag,"sendWebSocket : $sendData")
         //socket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]")
         socket.send(sendData)
