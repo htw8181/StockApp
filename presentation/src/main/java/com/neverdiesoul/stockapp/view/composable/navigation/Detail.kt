@@ -3,7 +3,9 @@ package com.neverdiesoul.stockapp.view.composable.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -36,12 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -53,8 +58,10 @@ import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.NONE_STATE
-import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.OrderbookUnitForDeatilView
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.TabGroup
+import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
+import com.neverdiesoul.stockapp.viewmodel.model.CoinOrderbookUnitForDetailView
+import java.math.RoundingMode
 import java.text.DecimalFormat
 
 private const val TAG = "NavDetailView"
@@ -65,6 +72,10 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
 
     var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
 
+    val realTimeCoinCurrentPrice by viewModel.coinCurrentPriceForViewSharedFlow.collectAsState(
+        initial = CoinCurrentPriceForView()
+    )
+
     val coinOrderBookPrices: List<CoinOrderBookPrice> by viewModel.coinOrderBookPrices.observeAsState(initial = mutableListOf())
 
     var realTimeCoinOrderBookPrice: UpbitRealTimeCoinOrderBookPrice by remember {
@@ -72,16 +83,17 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
     }
 
     val coinOrderBookAskPriceForDeatilViewList = remember {
-        mutableStateListOf<OrderbookUnitForDeatilView>()
+        mutableStateListOf<CoinOrderbookUnitForDetailView>()
     }
     val coinOrderBookBidPriceForDeatilViewList = remember {
-        mutableStateListOf<OrderbookUnitForDeatilView>()
+        mutableStateListOf<CoinOrderbookUnitForDetailView>()
     }
 
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(
-                "${coinMarketCode.korean_name}(${viewModel?.getMarketCodeToDisplay(coinMarketCode.market)})",
+                text = "${coinMarketCode.korean_name}(${viewModel.getMarketCodeToDisplay(coinMarketCode.market)})",
+                fontSize = 25.sp,
                 modifier = Modifier.padding(start = 10.dp)) },
                 actions = {
                     Icon(
@@ -101,6 +113,22 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                 bottom = paddingValues.calculateBottomPadding()
             ))
         {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight())
+            {
+                Column(modifier = Modifier
+                    .weight(0.5f, true)
+                    .padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)) {
+                    CurrentPriceItem(realTimeCoinCurrentPrice)
+                }
+
+                Box(modifier = Modifier
+                    .weight(0.5f, true)
+                    .align(Alignment.CenterVertically)) {
+                    Text(text = "Chart Area..", modifier = Modifier.align(Alignment.Center))
+                }
+            }
             Row {
                 TabRow(selectedTabIndex = selectedTabIndex,
                     modifier = Modifier
@@ -124,26 +152,21 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
             }
             
             Row(modifier = Modifier.weight(1f,true)) {
-                //Text("content body1",modifier = Modifier.weight(0.4f,true))
-                LazyColumn(modifier = Modifier.weight(0.4f,true)) {
-                    val onListItemClick = { orderbookUnitForDeatilView: OrderbookUnitForDeatilView->
+                LazyColumn(modifier = Modifier.weight(0.42f,true)) {
+                    val onListItemClick = { coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView->
 
                     }
-                    val list = mutableListOf<OrderbookUnitForDeatilView>()
+                    val list = mutableListOf<CoinOrderbookUnitForDetailView>()
                     list.addAll(coinOrderBookAskPriceForDeatilViewList)
                     list.addAll(coinOrderBookBidPriceForDeatilViewList)
 
                     items(list) {
-                        OrderBookPriceItem(it, viewModel, onListItemClick)
-                        Spacer(modifier = Modifier
-                            .background(color = Color.White)
-                            .height(1.dp)
-                            .fillMaxWidth())
+                        OrderBookPriceItem(realTimeCoinCurrentPrice, it, viewModel, onListItemClick)
                     }
                 }
 
                 OrderTabContent(modifier = Modifier
-                    .weight(0.6f, true)
+                    .weight(0.58f, true)
                     .fillMaxHeight()) {
                     TestComponent()
                 }
@@ -163,6 +186,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
             }
         })
         viewModel.getRealTimeStock()
+
         viewModel.coinOrderBookPriceForViewSharedFlow.collect { coinOrderBookPrice ->
             realTimeCoinOrderBookPrice = coinOrderBookPrice
         }
@@ -174,8 +198,8 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
             coinOrderBookBidPriceForDeatilViewList.clear()
             coinOrderBookPrices.forEach { coinOrderBookPrice->
                 coinOrderBookPrice.orderbookUnits.forEach { coinOrderBookUnit->
-                    coinOrderBookAskPriceForDeatilViewList.add(OrderbookUnitForDeatilView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
-                    coinOrderBookBidPriceForDeatilViewList.add(OrderbookUnitForDeatilView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
+                    coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
+                    coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
                 }
                 coinOrderBookAskPriceForDeatilViewList.reverse()
             }
@@ -189,32 +213,110 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
         coinOrderBookAskPriceForDeatilViewList.clear()
         coinOrderBookBidPriceForDeatilViewList.clear()
         realTimeCoinOrderBookPrice.orderbookUnits.forEach { coinOrderBookUnit->
-            coinOrderBookAskPriceForDeatilViewList.add(OrderbookUnitForDeatilView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
-            coinOrderBookBidPriceForDeatilViewList.add(OrderbookUnitForDeatilView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
+            coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
+            coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
         }
         coinOrderBookAskPriceForDeatilViewList.reverse()
     }
 }
 
 @Composable
-private fun OrderBookPriceItem(orderbookUnitForDeatilView: OrderbookUnitForDeatilView, viewModel: DetailViewModel, onClick: (OrderbookUnitForDeatilView)->Unit) {
+private fun CurrentPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView) {
+    val textColor: Color = when(coinCurrentPriceForView.change) {
+        "RISE" -> Color.Red
+        "FALL" -> Color.Blue
+        else -> Color.Black
+    }
+    Text(color = textColor, text = coinCurrentPriceForView.tradePrice?.let {
+        DecimalFormat("#,###.####").format(it).toString()
+    } ?: "", fontSize = 25.sp)
+    Row {
+        Text(color = textColor, text = coinCurrentPriceForView.changeRate?.let{
+            val changeSymbol = when(coinCurrentPriceForView.change) {
+                "RISE" -> "+"
+                "FALL" -> "-"
+                else -> ""
+            }
+            val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
+                if (result == "0") "0.00" else result
+            }
+            "$changeSymbol${changeRate}%"
+        } ?: "")
+        Text(color = textColor,
+            text = coinCurrentPriceForView.changePrice?.let {
+                val changeSymbol = when(coinCurrentPriceForView.change) {
+                    "RISE" -> "▲"
+                    "FALL" -> "▼"
+                    else -> ""
+                }
+                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
+                    if (result == "0") "0.0000" else result
+                }
+                "$changeSymbol$changePrice"
+            } ?: "",
+            modifier = Modifier.padding(start = 10.dp))
+    }
+}
+
+@Composable
+private fun OrderBookPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView, viewModel: DetailViewModel, onClick: (CoinOrderbookUnitForDetailView)->Unit) {
+    val isCurrentPrice = coinCurrentPriceForView.tradePrice == coinOrderbookUnitForDetailView.price
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(50.dp)
-        .background(if (orderbookUnitForDeatilView.isAsk) Color(red = 227, green = 235, blue = 245) else Color(red = 251, green = 241, blue = 239))
-        /*.padding(5.dp)*/
+        .background(
+            if (coinOrderbookUnitForDetailView.isAsk) Color(
+                red = 227,
+                green = 235,
+                blue = 245
+            ) else Color(red = 251, green = 241, blue = 239)
+        )
+        .border(
+            width = if (isCurrentPrice) 1.dp else 0.5.dp,
+            color = if (isCurrentPrice) Color.Black else Color.White,
+            shape = RectangleShape
+        )
         .clickable {
-            onClick(orderbookUnitForDeatilView)
+            onClick(coinOrderbookUnitForDetailView)
         }
     ) {
-        Column(horizontalAlignment = Alignment.End, modifier = Modifier
-            .align(Alignment.CenterVertically)
+        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.End, modifier = Modifier
+            //.align(Alignment.CenterVertically)
             .weight(.6f, true)
+            .fillMaxHeight()
             .padding(start = 2.dp, end = 2.dp)) {
-            Text(color = Color.Black,text = orderbookUnitForDeatilView.price?.let {
+
+            /**
+             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
+             */
+            var changeRate = 0.0
+            val changeRateStr = if ((coinCurrentPriceForView.prevClosingPrice != null && coinOrderbookUnitForDetailView.price != null)) {
+                val prevClosingPrice = coinCurrentPriceForView.prevClosingPrice!!
+                val price = coinOrderbookUnitForDetailView.price
+                changeRate = ((price.minus(prevClosingPrice) ) / prevClosingPrice * 100)
+                DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(changeRate).let { result->
+                    if (result == "0") "0.00" else result
+                } ?: "0.00"
+            } else "0.00"
+
+            val textColor = when {
+                changeRate > 0 -> Color.Red
+                changeRate < 0 -> Color.Blue
+                else -> Color.Black
+            }
+
+            val changeSymbol = when {
+                changeRate > 0 -> "+"
+                changeRate < 0 -> "-"
+                else -> ""
+            }
+
+            val orderBookPrice = coinOrderbookUnitForDetailView.price?.let {
                 DecimalFormat("#,###").format(it.toInt()).toString()
-            } ?: "")
-            Text(color = Color.Black, text = "xxx")
+            } ?: "0"
+            Text(color = textColor,text = orderBookPrice)
+
+            Text(color = textColor, text = "$changeSymbol${changeRateStr}%")
         }
 
         Spacer(modifier = Modifier
@@ -222,11 +324,10 @@ private fun OrderBookPriceItem(orderbookUnitForDeatilView: OrderbookUnitForDeati
             .width(1.dp)
             .fillMaxHeight())
 
-        Text(textAlign = TextAlign.End, modifier = Modifier
+        Text(textAlign = TextAlign.Start, modifier = Modifier
             .align(Alignment.CenterVertically)
-            .weight(.4f, true)
-            .padding(end = 2.dp),
-            text = orderbookUnitForDeatilView.size?.let {
+            .weight(.4f, true),
+            text = coinOrderbookUnitForDetailView.size?.let {
                 val result = DecimalFormat("#,###.###").format(it).toString()
                 if (result == "0") "0.000" else result
             } ?: "")

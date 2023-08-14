@@ -160,8 +160,8 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                 .background(color = Color(red = 241, green = 241, blue = 244))
                 .height(1.dp)
                 .fillMaxWidth())
-            Row(modifier = Modifier
-                .align(Alignment.CenterHorizontally)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                .height(35.dp)
                 .background(color = Color(red = 244, green = 245, blue = 248))) {
                 Text(text = stringResource(R.string.main_list_header1), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.main_list_header2), modifier = Modifier.weight(.25f, true), textAlign = TextAlign.Center)
@@ -249,6 +249,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                 coinCurrentPriceForViewList.add(CoinCurrentPriceForView(
                     market = coinCurrentPrice.market,
                     tradePrice = coinCurrentPrice.tradePrice,
+                    prevClosingPrice = coinCurrentPrice.prevClosingPrice,
                     changePrice = coinCurrentPrice.changePrice,
                     change = coinCurrentPrice.change,
                     changeRate = coinCurrentPrice.changeRate,
@@ -291,14 +292,15 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
             } ?: ""}")
         }
 
-        coinCurrentPriceForViewList.forEach { CoinCurrentPriceForView->
-            if (realTimeCoinCurrentPrice != null && CoinCurrentPriceForView.market == realTimeCoinCurrentPrice?.market) {
-                CoinCurrentPriceForView.tradePrice = realTimeCoinCurrentPrice?.tradePrice
-                CoinCurrentPriceForView.changePrice = realTimeCoinCurrentPrice?.changePrice
-                CoinCurrentPriceForView.change = realTimeCoinCurrentPrice?.change
-                CoinCurrentPriceForView.changeRate = realTimeCoinCurrentPrice?.changeRate
-                CoinCurrentPriceForView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
-                CoinCurrentPriceForView.isNewData = realTimeCoinCurrentPrice?.isNewData
+        coinCurrentPriceForViewList.forEach { coinCurrentPriceForView->
+            if (realTimeCoinCurrentPrice != null && coinCurrentPriceForView.market == realTimeCoinCurrentPrice?.market) {
+                coinCurrentPriceForView.tradePrice = realTimeCoinCurrentPrice?.tradePrice
+                coinCurrentPriceForView.prevClosingPrice = realTimeCoinCurrentPrice?.prevClosingPrice
+                coinCurrentPriceForView.changePrice = realTimeCoinCurrentPrice?.changePrice
+                coinCurrentPriceForView.change = realTimeCoinCurrentPrice?.change
+                coinCurrentPriceForView.changeRate = realTimeCoinCurrentPrice?.changeRate
+                coinCurrentPriceForView.accTradePrice24h = realTimeCoinCurrentPrice?.accTradePrice24h
+                coinCurrentPriceForView.isNewData = realTimeCoinCurrentPrice?.isNewData
                 return@forEach
             }
         }

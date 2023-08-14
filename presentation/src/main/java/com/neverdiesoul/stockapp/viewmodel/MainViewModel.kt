@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.ByteString
-import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import javax.inject.Inject
@@ -120,6 +119,7 @@ class MainViewModel @Inject constructor(
         val coinCurrentPriceForView = CoinCurrentPriceForView(
             market = data.code,
             tradePrice = data.tradePrice,
+            prevClosingPrice = data.prevClosingPrice,
             changeRate = data.changeRate,
             change = data.change,
             changePrice = data.changePrice,

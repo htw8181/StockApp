@@ -92,6 +92,7 @@ class DetailViewModel @Inject constructor(
                 val coinCurrentPriceForView = CoinCurrentPriceForView(
                     market = data.code,
                     tradePrice = data.tradePrice,
+                    prevClosingPrice = data.prevClosingPrice,
                     changeRate = data.changeRate,
                     change = data.change,
                     changePrice = data.changePrice,
@@ -110,33 +111,9 @@ class DetailViewModel @Inject constructor(
                 }
             }
         }
-
-
-
-
-
-
     }
 
     fun requestRealTimeCoinData(coinMarketCode: CoinMarketCode) {
         requestRealTimeCoinDataUseCase(listOf(UpbitType(RealTimeDataType.TICKER.type, listOf(coinMarketCode.market)),UpbitType(RealTimeDataType.ORDERBOOK.type, listOf(coinMarketCode.market))))
     }
-
-    /**
-     * 상세 화면 리스트에 보여줄 코인 호가 정보
-     */
-    data class OrderbookUnitForDeatilView (
-        /**
-         * true: 매도, false: 매수
-         */
-        val isAsk: Boolean = true,
-        /**
-         * 호가
-         */
-        val price: Double? = null,
-        /**
-         * 잔량
-         */
-        val size: Double? = null
-    )
 }

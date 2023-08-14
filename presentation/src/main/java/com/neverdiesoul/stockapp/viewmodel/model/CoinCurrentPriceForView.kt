@@ -15,6 +15,10 @@ data class CoinCurrentPriceForView(
      */
     var tradePrice         : Double?    = null,
     /**
+     * 전일 종가(UTC 0시 기준)
+     */
+    var prevClosingPrice   : Double?    = null,
+    /**
      * 변화율의 절대값
      */
     var changeRate         : Double? = null,
