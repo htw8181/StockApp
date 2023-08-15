@@ -3,19 +3,15 @@ package com.neverdiesoul.stockapp.view.composable.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,14 +50,16 @@ import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailCurrentPriceItem
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBookPriceItem
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBuyTabContent
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel
+import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.BUY_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.NONE_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.TabGroup
 import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import com.neverdiesoul.stockapp.viewmodel.model.CoinOrderbookUnitForDetailView
-import java.math.RoundingMode
-import java.text.DecimalFormat
 
 private const val TAG = "NavDetailView"
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +67,15 @@ private const val TAG = "NavDetailView"
 fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMarketCode: CoinMarketCode) {
     val context = LocalContext.current
 
+    /**
+     * 주문/호가/차트/시세/정보 탭 인덱스
+     */
     var selectedTabIndex by remember { mutableStateOf(NONE_STATE) }
+
+    /**
+     * 주문 탭의 매수/매도/거래내역 탭 인덱스
+     */
+    var selectedOrderTabIndex by remember { mutableStateOf(NONE_STATE) }
 
     val realTimeCoinCurrentPrice by viewModel.coinCurrentPriceForViewSharedFlow.collectAsState(
         initial = CoinCurrentPriceForView()
@@ -120,7 +125,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                 Column(modifier = Modifier
                     .weight(0.5f, true)
                     .padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)) {
-                    CurrentPriceItem(realTimeCoinCurrentPrice)
+                    DetailCurrentPriceItem(realTimeCoinCurrentPrice)
                 }
 
                 Box(modifier = Modifier
@@ -167,8 +172,12 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
 
                 OrderTabContent(modifier = Modifier
                     .weight(0.58f, true)
-                    .fillMaxHeight()) {
-                    TestComponent()
+                    .fillMaxHeight(), selectedOrderTabIndex = selectedOrderTabIndex, onClick = { tabIndex -> selectedOrderTabIndex = tabIndex })
+                {
+                    when(selectedOrderTabIndex) {
+                        BUY_STATE -> OrderBuyTabContent()
+                        else -> TestComponent()
+                    }
                 }
             }
         }
@@ -221,129 +230,46 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
 }
 
 @Composable
-private fun CurrentPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView) {
-    val textColor: Color = when(coinCurrentPriceForView.change) {
-        "RISE" -> Color.Red
-        "FALL" -> Color.Blue
-        else -> Color.Black
-    }
-    Text(color = textColor, text = coinCurrentPriceForView.tradePrice?.let {
-        DecimalFormat("#,###.####").format(it).toString()
-    } ?: "", fontSize = 25.sp)
-    Row {
-        Text(color = textColor, text = coinCurrentPriceForView.changeRate?.let{
-            val changeSymbol = when(coinCurrentPriceForView.change) {
-                "RISE" -> "+"
-                "FALL" -> "-"
-                else -> ""
-            }
-            val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
-                if (result == "0") "0.00" else result
-            }
-            "$changeSymbol${changeRate}%"
-        } ?: "")
-        Text(color = textColor,
-            text = coinCurrentPriceForView.changePrice?.let {
-                val changeSymbol = when(coinCurrentPriceForView.change) {
-                    "RISE" -> "▲"
-                    "FALL" -> "▼"
-                    else -> ""
-                }
-                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
-                    if (result == "0") "0.0000" else result
-                }
-                "$changeSymbol$changePrice"
-            } ?: "",
-            modifier = Modifier.padding(start = 10.dp))
-    }
-}
-
-@Composable
-private fun OrderBookPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView, viewModel: DetailViewModel, onClick: (CoinOrderbookUnitForDetailView)->Unit) {
-    val isCurrentPrice = coinCurrentPriceForView.tradePrice == coinOrderbookUnitForDetailView.price
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(50.dp)
-        .background(
-            if (coinOrderbookUnitForDetailView.isAsk) Color(
-                red = 227,
-                green = 235,
-                blue = 245
-            ) else Color(red = 251, green = 241, blue = 239)
-        )
-        .border(
-            width = if (isCurrentPrice) 1.dp else 0.5.dp,
-            color = if (isCurrentPrice) Color.Black else Color.White,
-            shape = RectangleShape
-        )
-        .clickable {
-            onClick(coinOrderbookUnitForDetailView)
-        }
-    ) {
-        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.End, modifier = Modifier
-            //.align(Alignment.CenterVertically)
-            .weight(.6f, true)
-            .fillMaxHeight()
-            .padding(start = 2.dp, end = 2.dp)) {
-
-            /**
-             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
-             */
-            var changeRate = 0.0
-            val changeRateStr = if ((coinCurrentPriceForView.prevClosingPrice != null && coinOrderbookUnitForDetailView.price != null)) {
-                val prevClosingPrice = coinCurrentPriceForView.prevClosingPrice!!
-                val price = coinOrderbookUnitForDetailView.price
-                changeRate = ((price.minus(prevClosingPrice) ) / prevClosingPrice * 100)
-                DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(changeRate).let { result->
-                    if (result == "0") "0.00" else result
-                } ?: "0.00"
-            } else "0.00"
-
-            val textColor = when {
-                changeRate > 0 -> Color.Red
-                changeRate < 0 -> Color.Blue
-                else -> Color.Black
-            }
-
-            val changeSymbol = when {
-                changeRate > 0 -> "+"
-                changeRate < 0 -> "-"
-                else -> ""
-            }
-
-            val orderBookPrice = coinOrderbookUnitForDetailView.price?.let {
-                DecimalFormat("#,###").format(it.toInt()).toString()
-            } ?: "0"
-            Text(color = textColor,text = orderBookPrice)
-
-            Text(color = textColor, text = "$changeSymbol${changeRateStr}%")
+private fun OrderTabContent(modifier: Modifier, selectedOrderTabIndex: Int, onClick: (Int)->Unit, content: @Composable ()->Unit) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .then(modifier)) {
+        Row {
+            TabRow(selectedTabIndex = selectedOrderTabIndex,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                tabs = {
+                    enumValues<DetailViewModel.OrderTabGroup>().forEachIndexed { tabIndex, tabValue ->
+                        Tab(modifier = Modifier.background(color = if (tabIndex == selectedOrderTabIndex) Color.White else Color(red = 238, green = 238, blue = 238)),
+                            selectedContentColor = if (tabIndex == selectedOrderTabIndex) when(selectedOrderTabIndex) {
+                                DetailViewModel.BUY_STATE -> Color.Red
+                                DetailViewModel.SELL_STATE -> Color.Blue
+                                else -> Color.Black
+                            } else Color(red = 51, green = 51, blue = 51),
+                            selected = tabIndex == selectedOrderTabIndex,
+                            onClick = {
+                                onClick(tabIndex)
+                            },
+                            content = {
+                                Column(modifier = Modifier.height(40.dp), verticalArrangement = Arrangement.Center) {
+                                    Text(text = stringResource(id = tabValue.resId))
+                                }
+                            })
+                    }
+                },
+                divider = {},
+                indicator = {}
+            )
         }
 
-        Spacer(modifier = Modifier
-            .background(color = Color.White)
-            .width(1.dp)
-            .fillMaxHeight())
-
-        Text(textAlign = TextAlign.Start, modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.4f, true),
-            text = coinOrderbookUnitForDetailView.size?.let {
-                val result = DecimalFormat("#,###.###").format(it).toString()
-                if (result == "0") "0.000" else result
-            } ?: "")
-    }
-}
-
-@Composable
-private fun OrderTabContent(modifier: Modifier, content: @Composable ()->Unit) {
-    Box(modifier = modifier) {
         content()
     }
 }
 
 @Composable
 private fun TestComponent() {
-    Text(text = "content body2", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+    Text(text = "개발 예정", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
 }
 
 @Preview

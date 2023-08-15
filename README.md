@@ -7,17 +7,17 @@
 - 실시간 주식 외에 별도로 API(매수,매도 ...)를 구하기가 어려우니, 
   실제 매수,매도 등의 서버 연동은 생략하고, Room DB를 통해 데이터를 처리하려 예정..
 
-# 사용 (예정) 기술 
+# 사용 기술 
 - Clean Architecture(Data-Domain-Presentation)
 - Jetpack Compose
-- WebView(HTML,CSS,JavaScript)
+- WebView(HTML,CSS,JavaScript) (사용 예정)
 - Dagger Hilt
 - Coroutine
 - LiveData & Flow
 - WebSocket
 - RoomDB
-- Chart??
-- Google Material Design
+- Chart?? (사용 예정)
+- Google Material Design (사용 예정)
 - Retrofit
 
 # 개발일지
@@ -102,6 +102,8 @@
   2. 웹소켓 통신 파라미터 수정 - 요청할 파라미터 타입(ticker,orderbook,trade)을 다수로 넘길 수 있도록 로직 수정 -> 상세화면에서 실시간으로 현재가와 호가를 동시에 받을 수 있게 함
 - 2023년 8월 15일
   1. 상세화면에서 현재가 와 호가 정보를 실시간으로 받아서 화면에 업데이트 하도록 로직 적용 
+- 2023년 8월 16일
+  1. 상세화면 주문 매수 탭 Compose UI 개발 중
 # 비고 & 특이사항
   * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
@@ -118,3 +120,7 @@
     디자인 탭에서는 컴포넌트들이 겹치거나 하는 등으로 잘 보이지 않고, 실제 화면상에서만 확인할 수 있는 소스 상의 composable 함수들이 어디에 위치하는지 궁금할때엔, 
     Layout Inspector를 적극 활용하자.
   - Layout Inspector에 보이는 컴포넌트 트리 상에서 원하는 컴포넌트를 더블 클릭하면 해당 composable 함수로 이동해준다.
+  * viewModel이 있는 Composable 경우 preview 탭에 컴포넌트가 그려지지 않는데, 해결방안 찾아볼 것
+  - 현재로써는 ViewModel을 쓰지 않는 TestActivity 한개 생성해서 거기서 Composable UI 작성해서 확인해보며 개발하고 있믐..
+    쫌더 기술적인 개발 방안을 잦아볼 필요가 있음..
+  - 시간될때 이것으로 해봐야겠다. [참고 URL](https://witcheryoon.tistory.com/316)

@@ -56,6 +56,13 @@ class DetailViewModel @Inject constructor(
         SISE(R.string.detail_tab_sise),
         INFO(R.string.detail_tab_info)
     }
+
+    enum class OrderTabGroup(val resId: Int) {
+        BUY(R.string.detail_buy_tab),
+        SELL(R.string.detail_sell_tab),
+        TRANSACTION(R.string.detail_transaction_tab)
+    }
+
     companion object {
         val NONE_STATE = -1
         val ORDER_STATE = TabGroup.ORDER.ordinal
@@ -63,6 +70,10 @@ class DetailViewModel @Inject constructor(
         val CHART_STATE = TabGroup.CHART.ordinal
         val SISE_STATE = TabGroup.SISE.ordinal
         val INFO_STATE = TabGroup.INFO.ordinal
+
+        val BUY_STATE = OrderTabGroup.BUY.ordinal
+        val SELL_STATE = OrderTabGroup.SELL.ordinal
+        val TRANSACTION_STATE = OrderTabGroup.TRANSACTION.ordinal
     }
 
     fun getCoinOrderBookPriceFromRemote(markets: List<String>) {

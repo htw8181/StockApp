@@ -4,12 +4,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +51,7 @@ import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.view.composable.navigation.main.MainCurrentPriceItem
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel
 import com.neverdiesoul.stockapp.viewmodel.MainViewModel.CoinGroup
@@ -185,7 +183,7 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
                 }
 
                 items(coinCurrentPriceForViewList) { coinCurrentPriceForView ->
-                    CurrentPriceItem(coinCurrentPriceForView, viewModel, onListItemClick)
+                    MainCurrentPriceItem(coinCurrentPriceForView, viewModel, onListItemClick)
                     Spacer(modifier = Modifier
                         .background(color = Color(red = 241, green = 241, blue = 244))
                         .height(1.dp)
@@ -359,88 +357,6 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 label = { Text(text = barItem.title)}
             )
         }
-    }
-}
-
-@Composable
-private fun CurrentPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, viewModel: MainViewModel, onClick: (CoinMarketCode)->Unit) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(50.dp)
-        .padding(start = 10.dp, end = 10.dp)
-        .clickable {
-            viewModel.getMarketCodes()?.find { it.market == coinCurrentPriceForView.market}?.let {
-                onClick(it)
-            }
-        }
-    )
-    {
-        val textColor: Color = when(coinCurrentPriceForView.change) {
-            "RISE" -> Color.Red
-            "FALL" -> Color.Blue
-            else -> Color.Black
-        }
-        Column(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.25f, true)) {
-            Text(text = coinCurrentPriceForView.market?.let{
-                viewModel.getMarketName(it)
-            } ?: "")
-            Text(text = viewModel.getMarketCodeToDisplay(coinCurrentPriceForView.market))
-        }
-
-        Box(modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = if (coinCurrentPriceForView.isNewData == true) textColor else Color.Transparent,
-                shape = RectangleShape
-            )
-            .weight(.25f, true)
-            .fillMaxHeight())
-        {
-            Text(modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 2.dp), textAlign = TextAlign.End, color = textColor, text = coinCurrentPriceForView.tradePrice?.let {
-                DecimalFormat("#,###.####").format(it).toString()
-            } ?: "")
-
-        }
-        if (coinCurrentPriceForView.isNewData == true) {
-            coinCurrentPriceForView.isNewData = false
-        }
-
-        Column(horizontalAlignment = Alignment.End, modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.25f, true)) {
-            Text(color = textColor, text = coinCurrentPriceForView.changeRate?.let{
-                val changeSymbol = when(coinCurrentPriceForView.change) {
-                    "RISE" -> "+"
-                    "FALL" -> "-"
-                    else -> ""
-                }
-                val changeRate = DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(it * 100).let { result->
-                    if (result == "0") "0.00" else result
-                }
-                "$changeSymbol${changeRate}%"
-            } ?: "")
-            Text(color = textColor, text = coinCurrentPriceForView.changePrice?.let {
-                val changeSymbol = when(coinCurrentPriceForView.change) {
-                    "FALL" -> "-"
-                    else -> ""
-                }
-                val changePrice = DecimalFormat("#,###.####").apply { roundingMode = RoundingMode.HALF_UP }.format(it).let { result->
-                    if (result == "0") "0.0000" else result
-                }
-                "$changeSymbol$changePrice"
-            } ?: "")
-        }
-        Text(textAlign = TextAlign.End, modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.25f, true),
-            text = coinCurrentPriceForView.accTradePrice24h?.let {
-                val result = (it.toDouble() / 100000) * 0.1
-                "${DecimalFormat("#,###").format(result.roundToInt()).toString()}백만"
-            } ?: "")
     }
 }
 
