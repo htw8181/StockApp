@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
@@ -22,6 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neverdiesoul.stockapp.R
@@ -81,6 +82,9 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
     var dropdownMenusWidthForComparedToTheCurrentPrice by remember {
         mutableStateOf(0)
     }
+    var comparedToTheCurrentPriceTextViewWidth by remember {
+        mutableStateOf(0)
+    }
 
     var checkedIconToggleButtonIndex by remember {
         mutableStateOf(IconToggleButtonIndex.NONE.index)
@@ -107,7 +111,8 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
         .then(modifier)) {
         Row(modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()) {
+            .wrapContentHeight())
+        {
             IconToggleButton(modifier = Modifier
                 .fillMaxWidth()
                 .weight(.3f, true), checked = checkedIconToggleButtonIndex == IconToggleButtonIndex.APPOINTED.index, onCheckedChange = { checkedIconToggleButtonIndex = IconToggleButtonIndex.APPOINTED.index }) {
@@ -139,7 +144,7 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(5.dp)) {
+            .padding(start = 5.dp, end = 5.dp)) {
             Text(text = stringResource(id = R.string.detail_order_possible), modifier = Modifier.padding(start = 5.dp, end = 5.dp))
             Text(text = "0 KRW", modifier = Modifier
                 .fillMaxWidth()
@@ -148,13 +153,13 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(5.dp)) {
+            .height(40.dp)
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                 .weight(.65f, true)
                 .fillMaxHeight()
                 .border(
-                    width = 2.dp,
+                    width = 1.dp,
                     color = Color(red = 221, green = 221, blue = 221),
                     shape = RectangleShape
                 )) {
@@ -174,44 +179,51 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
                 })
             {
                 Text(text = "${stringResource(id = selectedDropdownMenuItemsForPossible.resId)}  ▼")
-            }
 
-            DropdownMenu(modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight()
-                .padding(end = 5.dp)
-                .onGloballyPositioned {
-                    dropdownMenusWidthForPossible = with(density) {
-                        it.size.width
+                DropdownMenu(modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight()
+                    .background(Color.White)
+                    .border(
+                        width = 1.dp,
+                        color = Color(red = 221, green = 221, blue = 221),
+                        shape = RectangleShape
+                    )
+                    .onGloballyPositioned {
+                        dropdownMenusWidthForPossible = with(density) {
+                            it.size.width
+                        }
+                    },
+                    expanded = isDropdownMenuExpandedForPossible, onDismissRequest = {
+                        isDropdownMenuExpandedForPossible = false
+                        Toast.makeText(context,"onDismissRequest",Toast.LENGTH_SHORT).show()
                     }
-                },
-                expanded = isDropdownMenuExpandedForPossible, onDismissRequest = {
-                    isDropdownMenuExpandedForPossible = false
-                    Toast.makeText(context,"onDismissRequest",Toast.LENGTH_SHORT).show()
-                }, offset = DpOffset(screenWidth.minus(dropdownMenusWidthForPossible.dp),0.dp)
-            ) {
-                enumValues<DropdownMenuItemsForPossible>().forEachIndexed { index, value ->
-                    if (index == 0) return@forEachIndexed
-                    val showingText = stringResource(id = value.resId)
-                    DropdownMenuItem(text = { Text(text = showingText) },
-                        onClick = {
-                            selectedDropdownMenuItemsForPossible = value
-                            Toast.makeText(context,showingText,Toast.LENGTH_SHORT).show()
-                            isDropdownMenuExpandedForPossible = false
-                        })
+                ) {
+                    enumValues<DropdownMenuItemsForPossible>().forEachIndexed { index, value ->
+                        if (index == 0) return@forEachIndexed
+                        val showingText = stringResource(id = value.resId)
+                        DropdownMenuItem(modifier = Modifier.fillMaxWidth().height(33.dp), text = { Text(text = showingText) },
+                            onClick = {
+                                selectedDropdownMenuItemsForPossible = value
+                                Toast.makeText(context,showingText,Toast.LENGTH_SHORT).show()
+                                isDropdownMenuExpandedForPossible = false
+                            })
+                    }
                 }
             }
+
+
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(5.dp)) {
+            .height(40.dp)
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                 .weight(.65f, true)
                 .fillMaxHeight()
                 .border(
-                    width = 2.dp,
+                    width = 1.dp,
                     color = Color(red = 221, green = 221, blue = 221),
                     shape = RectangleShape
                 )) {
@@ -225,25 +237,25 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
                 .weight(.35f, true)
                 .fillMaxHeight()
                 .padding(start = 5.dp)) {
-                Button(modifier = Modifier
+                TextButton(modifier = Modifier
                     .weight(.5f, true)
                     .fillMaxHeight(), shape = RectangleShape, onClick = {}, colors = ButtonDefaults.buttonColors(containerColor = Color(238,238,238), contentColor = Color.Black)) {
-                    Text(text = "마")
+                    Text(text = "－", style = TextStyle(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold))
                 }
 
-                Button(modifier = Modifier
+                TextButton(modifier = Modifier
                     .weight(.5f, true)
                     .padding(start = 5.dp)
                     .fillMaxHeight(), shape = RectangleShape, onClick = {}, colors = ButtonDefaults.buttonColors(containerColor = Color(238,238,238), contentColor = Color.Black)) {
-                    Text(text = "플")
+                    Text(text = "＋", style = TextStyle(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold))
                 }
             }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(5.dp)) {
+            .height(40.dp)
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp)) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier
                 .weight(.65f, true)
                 .fillMaxHeight()
@@ -252,43 +264,55 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
                     isDropdownMenuExpandedForComparedToTheCurrentPrice = true
                 })
             {
-                Text(text = "${stringResource(id = selectedDropdownMenuItemsForComparedToTheCurrentPrice.resId)}  ▼")
+                Text(text = "${stringResource(id = selectedDropdownMenuItemsForComparedToTheCurrentPrice.resId)}  ▼",
+                modifier = Modifier.onGloballyPositioned {
+                    comparedToTheCurrentPriceTextViewWidth = with(density) {
+                        it.size.width
+                    }
+                })
+
+                DropdownMenu(modifier = Modifier
+                    .width(screenWidth.minus(comparedToTheCurrentPriceTextViewWidth.dp))
+                    .wrapContentHeight()
+                    .align(Alignment.BottomStart)
+                    .background(Color.White)
+                    .border(
+                        width = 1.dp,
+                        color = Color(red = 221, green = 221, blue = 221),
+                        shape = RectangleShape
+                    )
+                    .onGloballyPositioned {
+                        dropdownMenusWidthForComparedToTheCurrentPrice = with(density) {
+                            it.size.width
+                        }
+                    },
+                    expanded = isDropdownMenuExpandedForComparedToTheCurrentPrice, onDismissRequest = {
+                        isDropdownMenuExpandedForComparedToTheCurrentPrice = false
+                        Toast.makeText(context,"onDismissRequest",Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    enumValues<DropdownMenuItemsForComparedToTheCurrentPrice>().forEachIndexed { index, value ->
+                        if (index == 0) return@forEachIndexed
+                        val showingText = stringResource(id = value.resId)
+                        DropdownMenuItem(modifier = Modifier.fillMaxWidth().height(33.dp), text = { Text(text = showingText) },
+                            onClick = {
+                                selectedDropdownMenuItemsForComparedToTheCurrentPrice = value
+                                Toast.makeText(context,showingText,Toast.LENGTH_SHORT).show()
+                                isDropdownMenuExpandedForComparedToTheCurrentPrice = false
+                            })
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.weight(.35f,true))
-            DropdownMenu(modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight()
-                .padding(end = 5.dp)
-                .onGloballyPositioned {
-                    dropdownMenusWidthForComparedToTheCurrentPrice = with(density) {
-                        it.size.width
-                    }
-                },
-                expanded = isDropdownMenuExpandedForComparedToTheCurrentPrice, onDismissRequest = {
-                    isDropdownMenuExpandedForComparedToTheCurrentPrice = false
-                    Toast.makeText(context,"onDismissRequest",Toast.LENGTH_SHORT).show()
-                }, offset = DpOffset(screenWidth.minus(dropdownMenusWidthForComparedToTheCurrentPrice.dp),0.dp)
-            ) {
-                enumValues<DropdownMenuItemsForComparedToTheCurrentPrice>().forEachIndexed { index, value ->
-                    if (index == 0) return@forEachIndexed
-                    val showingText = stringResource(id = value.resId)
-                    DropdownMenuItem(text = { Text(text = showingText) },
-                        onClick = {
-                            selectedDropdownMenuItemsForComparedToTheCurrentPrice = value
-                            Toast.makeText(context,showingText,Toast.LENGTH_SHORT).show()
-                            isDropdownMenuExpandedForComparedToTheCurrentPrice = false
-                        })
-                }
-            }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(5.dp)
+            .height(40.dp)
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp)
             .border(
-                width = 2.dp,
+                width = 1.dp,
                 color = Color(red = 221, green = 221, blue = 221),
                 shape = RectangleShape
             )) {
@@ -300,8 +324,8 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(5.dp)) {
+            .height(40.dp)
+            .padding(top = 5.dp, start = 5.dp, end = 5.dp)) {
             Button(modifier = Modifier.weight(.5f,true).fillMaxHeight(), shape = RectangleShape, colors = ButtonDefaults.buttonColors(containerColor = Color(119,119,119), contentColor = Color.White), onClick = { /*TODO*/ }) {
                 Text(text = stringResource(id = R.string.detail_reset))
             }

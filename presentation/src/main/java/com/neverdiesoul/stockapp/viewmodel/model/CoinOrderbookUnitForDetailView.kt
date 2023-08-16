@@ -15,5 +15,9 @@ data class CoinOrderbookUnitForDetailView (
     /**
      * 잔량
      */
-    val size: Double? = null
+    val size: Double? = null,
+    /**
+     * 호가 총 잔량
+     */
+    val totalSize   : Double? = null
 )

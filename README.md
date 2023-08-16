@@ -102,25 +102,26 @@
   2. 웹소켓 통신 파라미터 수정 - 요청할 파라미터 타입(ticker,orderbook,trade)을 다수로 넘길 수 있도록 로직 수정 -> 상세화면에서 실시간으로 현재가와 호가를 동시에 받을 수 있게 함
 - 2023년 8월 15일
   1. 상세화면에서 현재가 와 호가 정보를 실시간으로 받아서 화면에 업데이트 하도록 로직 적용 
-- 2023년 8월 16일
+- 2023년 8월 16일,17일
   1. 상세화면 주문 매수 탭 Compose UI 개발 중
 # 비고 & 특이사항
-  * 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
+  1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
   - 메인에서 flow collect 해서 실시간 데이터를 받는 것까지는 괜찮은데, 이를 composable에서 state 변수가 몇몇 받아내지 못하고 있다.. 
-  * Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 
+  2. Room DB에서 DAO 함수 반환형을 Flow를 사용하도록 로직 수정 
   - [참고 URL](https://hungseong.tistory.com/33)
   - 이 건은 취소 한다. DAO 함수(Select 쿼리문) 반환형을 Flow로 적용하면, DB데이터가 바뀔때마다 자동으로 호출되는데,
     현재 앱에서는 굳이 필요할 것 같지 않아 추후, 필요시에 검토해서 적용하려 함. 
   - 반환형을 Flow로 적용하니까, collect 후에 onCompletion 메소드가 호출되지 않는게 찜찜하다..
-  * plugin을 compose로 찾아보니, 몇몇 쓸만한 것들이 눈에 띈다. 
+  3. plugin을 compose로 찾아보니, 몇몇 쓸만한 것들이 눈에 띈다. 
   - Compose Modifiers Playground -> compose modifier 들을 바꿔가며 각 속성들이 뭐하는 것인지 알려줌
   - HTML to compose web converter -> HTML 코드를 compose 코드로 컨버젼 해주는 것
-  * 디자인 탭에서 육안으로 보이는 것을 더블 클릭하여, 해당 컴포넌트 소스 위치를 알 수 있지만..
+  4. 디자인 탭에서 육안으로 보이는 것을 더블 클릭하여, 해당 컴포넌트 소스 위치를 알 수 있지만..
     디자인 탭에서는 컴포넌트들이 겹치거나 하는 등으로 잘 보이지 않고, 실제 화면상에서만 확인할 수 있는 소스 상의 composable 함수들이 어디에 위치하는지 궁금할때엔, 
     Layout Inspector를 적극 활용하자.
   - Layout Inspector에 보이는 컴포넌트 트리 상에서 원하는 컴포넌트를 더블 클릭하면 해당 composable 함수로 이동해준다.
-  * viewModel이 있는 Composable 경우 preview 탭에 컴포넌트가 그려지지 않는데, 해결방안 찾아볼 것
+  5. viewModel이 있는 Composable 경우 preview 탭에 컴포넌트가 그려지지 않는데, 해결방안 찾아볼 것
   - 현재로써는 ViewModel을 쓰지 않는 TestActivity 한개 생성해서 거기서 Composable UI 작성해서 확인해보며 개발하고 있믐..
     쫌더 기술적인 개발 방안을 잦아볼 필요가 있음..
-  - 시간될때 이것으로 해봐야겠다. [참고 URL](https://witcheryoon.tistory.com/316)
+  - interface나 abstract class를 이용하여 fake ViewModel을 활용하는 것도 괜찮은 것 같다.
+    [참고 URL](https://witcheryoon.tistory.com/316)

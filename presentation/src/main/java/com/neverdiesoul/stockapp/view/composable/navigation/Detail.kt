@@ -207,8 +207,8 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
             coinOrderBookBidPriceForDeatilViewList.clear()
             coinOrderBookPrices.forEach { coinOrderBookPrice->
                 coinOrderBookPrice.orderbookUnits.forEach { coinOrderBookUnit->
-                    coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
-                    coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
+                    coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize, totalSize = coinOrderBookPrice.totalAskSize))
+                    coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize, totalSize = coinOrderBookPrice.totalBidSize))
                 }
                 coinOrderBookAskPriceForDeatilViewList.reverse()
             }
@@ -222,8 +222,8 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
         coinOrderBookAskPriceForDeatilViewList.clear()
         coinOrderBookBidPriceForDeatilViewList.clear()
         realTimeCoinOrderBookPrice.orderbookUnits.forEach { coinOrderBookUnit->
-            coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize))
-            coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize))
+            coinOrderBookAskPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = true, price = coinOrderBookUnit.askPrice, size = coinOrderBookUnit.askSize, totalSize = realTimeCoinOrderBookPrice.totalAskSize))
+            coinOrderBookBidPriceForDeatilViewList.add(CoinOrderbookUnitForDetailView(isAsk = false, price = coinOrderBookUnit.bidPrice, size = coinOrderBookUnit.bidSize, totalSize = realTimeCoinOrderBookPrice.totalBidSize))
         }
         coinOrderBookAskPriceForDeatilViewList.reverse()
     }
