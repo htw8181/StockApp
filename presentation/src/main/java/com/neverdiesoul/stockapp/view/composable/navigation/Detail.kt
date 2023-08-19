@@ -52,11 +52,14 @@ import com.neverdiesoul.stockapp.R
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailCurrentPriceItem
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBookPriceItem
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBottomSheet
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBuyTabContent
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderModalBottomSheetType
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.BUY_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.NONE_STATE
+import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.SELL_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.TabGroup
 import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import com.neverdiesoul.stockapp.viewmodel.model.CoinOrderbookUnitForDetailView
@@ -75,7 +78,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
     /**
      * 주문 탭의 매수/매도/거래내역 탭 인덱스
      */
-    var selectedOrderTabIndex by remember { mutableStateOf(NONE_STATE) }
+    var selectedOrderTabIndex by remember { mutableStateOf(BUY_STATE) }
 
     val realTimeCoinCurrentPrice by viewModel.coinCurrentPriceForViewSharedFlow.collectAsState(
         initial = CoinCurrentPriceForView()
@@ -92,6 +95,10 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
     }
     val coinOrderBookBidPriceForDeatilViewList = remember {
         mutableStateListOf<CoinOrderbookUnitForDetailView>()
+    }
+
+    var showBottomSheetKeyboard by remember {
+        mutableStateOf(false)
     }
 
     Scaffold(
@@ -111,75 +118,90 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
         },
         bottomBar = {}
     ) { paddingValues ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
-            ))
-        {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight())
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
+                ))
             {
-                Column(modifier = Modifier
-                    .weight(0.5f, true)
-                    .padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)) {
-                    DetailCurrentPriceItem(realTimeCoinCurrentPrice)
-                }
-
-                Box(modifier = Modifier
-                    .weight(0.5f, true)
-                    .align(Alignment.CenterVertically)) {
-                    Text(text = "Chart Area..", modifier = Modifier.align(Alignment.Center))
-                }
-            }
-            Row {
-                TabRow(selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    containerColor = Color(red = 9, green = 54, blue = 135), //탭 백그라운드 컬러
-                    tabs = {
-                        enumValues<TabGroup>().forEachIndexed { tabIndex, tabValue ->
-                            Tab(modifier = Modifier,
-                                selectedContentColor = Color.White,
-                                unselectedContentColor = Color(red = 157, green = 175, blue = 207),
-                                selected = tabIndex == selectedTabIndex,
-                                onClick = {
-                                    selectedTabIndex = tabIndex
-                                },
-                                content = { Text(text = stringResource(id = tabValue.resId), modifier = Modifier.padding(10.dp)) })
-                        }
-                    },
-                    indicator = {}
-                )
-            }
-            
-            Row(modifier = Modifier.weight(1f,true)) {
-                LazyColumn(modifier = Modifier.weight(0.42f,true)) {
-                    val onListItemClick = { coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView->
-
-                    }
-                    val list = mutableListOf<CoinOrderbookUnitForDetailView>()
-                    list.addAll(coinOrderBookAskPriceForDeatilViewList)
-                    list.addAll(coinOrderBookBidPriceForDeatilViewList)
-
-                    items(list) {
-                        OrderBookPriceItem(realTimeCoinCurrentPrice, it, viewModel, onListItemClick)
-                    }
-                }
-
-                OrderTabContent(modifier = Modifier
-                    .weight(0.58f, true)
-                    .fillMaxHeight(), selectedOrderTabIndex = selectedOrderTabIndex, onClick = { tabIndex -> selectedOrderTabIndex = tabIndex })
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight())
                 {
-                    when(selectedOrderTabIndex) {
-                        BUY_STATE -> OrderBuyTabContent()
-                        else -> TestComponent()
+                    Column(modifier = Modifier
+                        .weight(0.5f, true)
+                        .padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)) {
+                        DetailCurrentPriceItem(realTimeCoinCurrentPrice)
+                    }
+
+                    Box(modifier = Modifier
+                        .weight(0.5f, true)
+                        .align(Alignment.CenterVertically)) {
+                        Text(text = "Chart Area..", modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+                Row {
+                    TabRow(selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        containerColor = Color(red = 9, green = 54, blue = 135), //탭 백그라운드 컬러
+                        tabs = {
+                            enumValues<TabGroup>().forEachIndexed { tabIndex, tabValue ->
+                                Tab(modifier = Modifier,
+                                    selectedContentColor = Color.White,
+                                    unselectedContentColor = Color(red = 157, green = 175, blue = 207),
+                                    selected = tabIndex == selectedTabIndex,
+                                    onClick = {
+                                        selectedTabIndex = tabIndex
+                                    },
+                                    content = { Text(text = stringResource(id = tabValue.resId), modifier = Modifier.padding(10.dp)) })
+                            }
+                        },
+                        indicator = {}
+                    )
+                }
+
+                Row(modifier = Modifier.weight(1f,true)) {
+                    LazyColumn(modifier = Modifier.weight(0.42f,true)) {
+                        val onListItemClick = { coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView->
+
+                        }
+                        val list = mutableListOf<CoinOrderbookUnitForDetailView>()
+                        list.addAll(coinOrderBookAskPriceForDeatilViewList)
+                        list.addAll(coinOrderBookBidPriceForDeatilViewList)
+
+                        items(list) {
+                            OrderBookPriceItem(realTimeCoinCurrentPrice, it, onListItemClick)
+                        }
+                    }
+
+                    OrderTabContent(modifier = Modifier
+                        .weight(0.58f, true)
+                        .fillMaxHeight(), selectedOrderTabIndex = selectedOrderTabIndex, onClick = { tabIndex -> selectedOrderTabIndex = tabIndex })
+                    {
+                        when(selectedOrderTabIndex) {
+                            BUY_STATE -> OrderBuyTabContent(showBottomSheetToCalculate = { showBottomSheetKeyboard = true })
+                            else -> TestComponent()
+                        }
                     }
                 }
             }
+
+            val onClick = { showBottomSheetKeyboard = false }
+            val onDismiss = { showBottomSheetKeyboard = false }
+            OrderBottomSheet(modifier = Modifier.align(Alignment.BottomCenter),
+                showBottomSheetKeyboard = showBottomSheetKeyboard,
+                realTimeCoinCurrentPrice = realTimeCoinCurrentPrice,
+                orderBookHogaPriceItemList = mutableListOf<CoinOrderbookUnitForDetailView>().apply {
+                    this.addAll(coinOrderBookAskPriceForDeatilViewList)
+                    this.addAll(coinOrderBookBidPriceForDeatilViewList)
+                },
+                style = OrderModalBottomSheetType.STYLE1,
+                onClick = onClick,
+                onDismiss = onDismiss)
         }
     }
 
@@ -243,8 +265,8 @@ private fun OrderTabContent(modifier: Modifier, selectedOrderTabIndex: Int, onCl
                     enumValues<DetailViewModel.OrderTabGroup>().forEachIndexed { tabIndex, tabValue ->
                         Tab(modifier = Modifier.background(color = if (tabIndex == selectedOrderTabIndex) Color.White else Color(red = 238, green = 238, blue = 238)),
                             selectedContentColor = if (tabIndex == selectedOrderTabIndex) when(selectedOrderTabIndex) {
-                                DetailViewModel.BUY_STATE -> Color.Red
-                                DetailViewModel.SELL_STATE -> Color.Blue
+                                BUY_STATE -> Color.Red
+                                SELL_STATE -> Color.Blue
                                 else -> Color.Black
                             } else Color(red = 51, green = 51, blue = 51),
                             selected = tabIndex == selectedOrderTabIndex,

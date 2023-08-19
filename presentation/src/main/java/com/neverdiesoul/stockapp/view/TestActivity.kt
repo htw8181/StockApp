@@ -9,7 +9,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBuyTabContent
 import com.neverdiesoul.stockapp.view.ui.theme.StockAppTheme
 
 /**
@@ -25,7 +24,7 @@ class TestActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
+                    MainScreen()
                 }
             }
         }
@@ -34,8 +33,10 @@ class TestActivity : ComponentActivity() {
 
 @Composable
 private fun MainScreen(modifier: Modifier = Modifier) {
-    OrderBuyTabContent(Modifier.fillMaxSize())
+
 }
+
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

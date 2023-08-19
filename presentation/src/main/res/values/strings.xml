@@ -34,5 +34,19 @@
     <string name="detail_total_order_price">총액</string>
     <string name="detail_reset">초기화</string>
     <string name="detail_buy">매수</string>
+    <string name="order_bottom_sheet_title1">주문수량/총액 입력</string>
+    <string name="order_bottom_sheet_title2">가격 입력</string>
+    <string name="order_bottom_sheet_title1_tab1">주문수량</string>
+    <string name="order_bottom_sheet_title1_tab2">주문총액</string>
+    <string name="order_bottom_sheet_order_price">주문가격</string>
+    <string name="order_bottom_sheet_order_amount">주문수량</string>
+    <string name="order_bottom_sheet_order_total_price">주문총액</string>
+    <string name="order_bottom_sheet_button_plus_ten_million">+1000만</string>
+    <string name="order_bottom_sheet_button_plus_one_million">+100만</string>
+    <string name="order_bottom_sheet_button_plus_one_hundred_thousand">+10만</string>
+    <string name="order_bottom_sheet_button_plus_ten_thousand">+1만</string>
+    <string name="order_bottom_sheet_button_maximum">최대</string>
+    <string name="order_bottom_sheet_button_reset">초기화</string>
+    <string name="order_bottom_sheet_button_confirm">획인</string>
     <string name="title_activity_test">TestActivity</string>
 </resources>

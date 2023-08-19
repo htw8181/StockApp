@@ -1,6 +1,5 @@
 package com.neverdiesoul.stockapp.view.composable.navigation.detail
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.neverdiesoul.stockapp.viewmodel.FakeViewModel
 import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import com.neverdiesoul.stockapp.viewmodel.model.CoinOrderbookUnitForDetailView
 import java.math.RoundingMode
@@ -30,7 +28,7 @@ import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 @Composable
-fun OrderBookPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView, viewModel: FakeViewModel, onClick: (CoinOrderbookUnitForDetailView)->Unit) {
+fun OrderBookPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView, onClick: (CoinOrderbookUnitForDetailView)->Unit, isOnlyOrderBookHogaItem: Boolean = false) {
     val isCurrentPrice = coinCurrentPriceForView.tradePrice == coinOrderbookUnitForDetailView.price
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -53,76 +51,77 @@ fun OrderBookPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrd
     ) {
         Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.End, modifier = Modifier
             //.align(Alignment.CenterVertically)
-            .weight(.6f, true)
+            .weight(if (isOnlyOrderBookHogaItem) 1.0f else .6f, true)
             .fillMaxHeight()
             .padding(start = 2.dp, end = 2.dp)) {
 
-            /**
-             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
-             */
-            /**
-             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
-             */
-            /**
-             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
-             */
-
-            /**
-             * 변화율 계싼 : (호가 - 전일종가) / 전일종가
-             */
-            var changeRate = 0.0
-            val changeRateStr = if ((coinCurrentPriceForView.prevClosingPrice != null && coinOrderbookUnitForDetailView.price != null)) {
-                val prevClosingPrice = coinCurrentPriceForView.prevClosingPrice!!
-                val price = coinOrderbookUnitForDetailView.price
-                changeRate = ((price.minus(prevClosingPrice) ) / prevClosingPrice * 100)
-                DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(changeRate).let { result->
-                    if (result == "0") "0.00" else result
-                } ?: "0.00"
-            } else "0.00"
-
-            val textColor = when {
-                changeRate > 0 -> Color.Red
-                changeRate < 0 -> Color.Blue
-                else -> Color.Black
-            }
-
-            val changeSymbol = when {
-                changeRate > 0 -> "+"
-                changeRate < 0 -> "-"
-                else -> ""
-            }
-
-            val orderBookPrice = coinOrderbookUnitForDetailView.price?.let {
-                DecimalFormat("#,###").format(it.toInt()).toString()
-            } ?: "0"
-            Text(color = textColor,text = orderBookPrice)
-
-            Text(color = textColor, text = "$changeSymbol${changeRateStr}%")
+            OrderBookHogaPriceItem(coinCurrentPriceForView, coinOrderbookUnitForDetailView)
         }
 
-        Spacer(modifier = Modifier
-            .background(color = Color.White)
-            .width(1.dp)
-            .fillMaxHeight())
+        if (!isOnlyOrderBookHogaItem) {
+            Spacer(modifier = Modifier
+                .background(color = Color.White)
+                .width(1.dp)
+                .fillMaxHeight())
 
-        Box(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .weight(.4f, true)) {
+            Box(modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(.4f, true)) {
 
-            //잔량
-            val size = coinOrderbookUnitForDetailView.size ?: 0.0
-            //총잔량
-            val totalSize = coinOrderbookUnitForDetailView.totalSize ?: 0.0
-            val graphWidth = (( size / totalSize * 1000.0f ).roundToInt() / 1000.0f).run { if (this > 1.0f) 1.0f else this }
-            //Log.d("graphWidth","totalSize $totalSize")
-            //Log.d("graphWidth","graphWidth $graphWidth")
-            Box(modifier = Modifier.fillMaxWidth(graphWidth).fillMaxHeight(.5f).background(if (coinOrderbookUnitForDetailView.isAsk) Color(204,221,242) else Color(245,217,214)))
-            Text(textAlign = TextAlign.Start,
-                text = coinOrderbookUnitForDetailView.size?.let {
-                    val result = DecimalFormat("#,###.###").format(it).toString()
-                    if (result == "0") "0.000" else result
-                } ?: "")
+                OrderBookHogaSizeItem(coinOrderbookUnitForDetailView)
+            }
         }
-        
     }
+}
+
+@Composable
+fun OrderBookHogaPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView) {
+    /**
+     * 변화율 계산 : (호가 - 전일종가) / 전일종가
+     */
+    var changeRate = 0.0
+    val changeRateStr = if ((coinCurrentPriceForView.prevClosingPrice != null && coinOrderbookUnitForDetailView.price != null)) {
+        val prevClosingPrice = coinCurrentPriceForView.prevClosingPrice!!
+        val price = coinOrderbookUnitForDetailView.price
+        changeRate = ((price.minus(prevClosingPrice) ) / prevClosingPrice * 100)
+        DecimalFormat("#.##").apply { roundingMode = RoundingMode.HALF_UP }.format(changeRate).let { result->
+            if (result == "0") "0.00" else result
+        } ?: "0.00"
+    } else "0.00"
+
+    val textColor = when {
+        changeRate > 0 -> Color.Red
+        changeRate < 0 -> Color.Blue
+        else -> Color.Black
+    }
+
+    val changeSymbol = when {
+        changeRate > 0 -> "+"
+        changeRate < 0 -> "-"
+        else -> ""
+    }
+
+    val orderBookPrice = coinOrderbookUnitForDetailView.price?.let {
+        DecimalFormat("#,###").format(it.toInt()).toString()
+    } ?: "0"
+    Text(color = textColor,text = orderBookPrice)
+
+    Text(color = textColor, text = "$changeSymbol${changeRateStr}%")
+}
+
+@Composable
+fun OrderBookHogaSizeItem(coinOrderbookUnitForDetailView: CoinOrderbookUnitForDetailView) {
+    //잔량
+    val size = coinOrderbookUnitForDetailView.size ?: 0.0
+    //총잔량
+    val totalSize = coinOrderbookUnitForDetailView.totalSize ?: 0.0
+    val graphWidth = (( size / totalSize * 1000.0f ).roundToInt() / 1000.0f).run { if (this > 1.0f) 1.0f else this }
+    //Log.d("graphWidth","totalSize $totalSize")
+    //Log.d("graphWidth","graphWidth $graphWidth")
+    Box(modifier = Modifier.fillMaxWidth(graphWidth).fillMaxHeight(.5f).background(if (coinOrderbookUnitForDetailView.isAsk) Color(204,221,242) else Color(245,217,214)))
+    Text(textAlign = TextAlign.Start,
+        text = coinOrderbookUnitForDetailView.size?.let {
+            val result = DecimalFormat("#,###.###").format(it).toString()
+            if (result == "0") "0.000" else result
+        } ?: "")
 }

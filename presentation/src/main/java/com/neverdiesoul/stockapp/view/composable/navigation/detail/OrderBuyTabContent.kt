@@ -71,7 +71,7 @@ private enum class DropdownMenuItemsForComparedToTheCurrentPrice(val resId: Int,
 }
 
 @Composable
-fun OrderBuyTabContent(modifier: Modifier = Modifier) {
+fun OrderBuyTabContent(modifier: Modifier = Modifier, showBottomSheetToCalculate: ()->Unit) {
     val context = LocalContext.current
 
     val screenWidth = (LocalConfiguration.current.screenWidthDp.dp)
@@ -162,7 +162,7 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
                     width = 1.dp,
                     color = Color(red = 221, green = 221, blue = 221),
                     shape = RectangleShape
-                )) {
+                ).clickable { showBottomSheetToCalculate() }) {
                 Text(text = stringResource(id = R.string.detail_order_amount), modifier = Modifier.padding(start = 5.dp))
                 Text(text = "0", modifier = Modifier
                     .weight(1.0f, true)
@@ -315,7 +315,7 @@ fun OrderBuyTabContent(modifier: Modifier = Modifier) {
                 width = 1.dp,
                 color = Color(red = 221, green = 221, blue = 221),
                 shape = RectangleShape
-            )) {
+            ).clickable { showBottomSheetToCalculate() }) {
             Text(text = stringResource(id = R.string.detail_total_order_price), modifier = Modifier.padding(start = 5.dp))
             Text(text = "0 KRW", modifier = Modifier
                 .weight(1.0f, true)

@@ -104,6 +104,9 @@
   1. 상세화면에서 현재가 와 호가 정보를 실시간으로 받아서 화면에 업데이트 하도록 로직 적용 
 - 2023년 8월 16일,17일
   1. 상세화면 주문 매수 탭 Compose UI 개발 중
+  2. 상세화면 주문 매수/매도 탭에 수량/가격 필드 클릭시 보일 ModalBottomSheet 적용 [참고URL](https://workspace-dev.medium.com/hello-modalbottomsheet-b8fa11bb6423)
+- 2023년 8월 20일
+  1. ModalBottomSheet을 사용하려 했으나, 하단 소프트키와 겹치는 현상이 있고, ModalBottomSheet 자체 버그(아직 실험단계의 컴포넌트이니까..)인 듯 하여 AnimatedVisibility를 활용하여 BottomSheet를 비슷하게 만들어 봤음..
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
@@ -125,3 +128,5 @@
     쫌더 기술적인 개발 방안을 잦아볼 필요가 있음..
   - interface나 abstract class를 이용하여 fake ViewModel을 활용하는 것도 괜찮은 것 같다.
     [참고 URL](https://witcheryoon.tistory.com/316)
+  6. webView content 개발시에는 예전 xml 사용하는 방식으로 compose에 붙여볼 생각인데, [참고 URL](https://developer.android.com/jetpack/compose/interop/interop-apis?hl=ko)을 보며 해볼 예정.
+  7. compose layout align은 [참고 URL](https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary#Column(androidx.compose.ui.Modifier,androidx.compose.foundation.layout.Arrangement.Vertical,androidx.compose.ui.Alignment.Horizontal,kotlin.Function1))
