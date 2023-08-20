@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +29,7 @@ import kotlin.math.roundToInt
 fun MainCurrentPriceItem(coinCurrentPriceForView: CoinCurrentPriceForView, viewModel: MainViewModel, onClick: (CoinMarketCode)->Unit) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .height(50.dp)
+        .height(IntrinsicSize.Min)
         .padding(start = 10.dp, end = 10.dp)
         .clickable {
             viewModel.getMarketCodes()?.find { it.market == coinCurrentPriceForView.market}?.let {
