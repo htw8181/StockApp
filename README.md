@@ -107,6 +107,9 @@
   2. 상세화면 주문 매수/매도 탭에 수량/가격 필드 클릭시 보일 ModalBottomSheet 적용 [참고URL](https://workspace-dev.medium.com/hello-modalbottomsheet-b8fa11bb6423)
 - 2023년 8월 20일
   1. ModalBottomSheet을 사용하려 했으나, 하단 소프트키와 겹치는 현상이 있고, ModalBottomSheet 자체 버그(아직 실험단계의 컴포넌트이니까..)인 듯 하여 AnimatedVisibility를 활용하여 BottomSheet를 비슷하게 만들어 봤음..
+- 2023년 8월 21일
+  1. 상세화면 호가 탭 구성 - Compose에서 예전 AndroidView를 사용해보려 함 [참고 URL](https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose?hl=ko)
+  2. 상세화면 호가 탭에 AndroidView를 구성하고 웹뷰를 배치 - 추후, 호가 정보는 웹으로 개발한 소스를 GitHub(무료호스팅)에 배포하여 웹뷰로 볼 수 있도록 할 예정
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요

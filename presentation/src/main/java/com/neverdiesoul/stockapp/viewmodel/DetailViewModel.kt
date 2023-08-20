@@ -51,7 +51,7 @@ class DetailViewModel @Inject constructor(
 
     enum class TabGroup(val resId: Int) {
         ORDER(R.string.detail_tab_order),
-        HOGA_ORDER(R.string.detail_tab_hoga_order),
+        HOGA_ORDER(R.string.detail_tab_hoga),
         CHART(R.string.detail_tab_chart),
         SISE(R.string.detail_tab_sise),
         INFO(R.string.detail_tab_info)

@@ -14,7 +14,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.StockApp"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".WebViewActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
+
+        </activity>
         <activity
             android:name=".view.TestActivity"
             android:exported="false"
