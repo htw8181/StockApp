@@ -256,7 +256,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                                         //defaultFixedFontSize = 14; //기본 고정 글꼴 크기, value : 1~72 사이의 숫자
                                     }
                                     //addJavascriptInterface(Bridge(),"StockAppWebViewBridge")
-                                    loadUrl("https://poiemaweb.com/")
+                                    loadUrl("https://htw8181.github.io/")
                                     webView = this
                                     backEnabled = true
                                 }
