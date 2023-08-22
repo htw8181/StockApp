@@ -105,7 +105,8 @@ fun Main(navController: NavHostController, viewModel: MainViewModel) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(rememberNavController())
+            //추후 필요시 추가 개발 예정
+            //BottomNavigationBar(rememberNavController())
         }
     ) { paddingValues ->
         Column(modifier = Modifier

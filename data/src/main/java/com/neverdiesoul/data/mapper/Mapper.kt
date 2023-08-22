@@ -1,6 +1,7 @@
 package com.neverdiesoul.data.mapper
 
 import com.neverdiesoul.data.db.entity.CoinMarketCodeEntity
+import com.neverdiesoul.data.model.ResponseCoinCandleChartData
 import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinOrderBookPrice
 
@@ -8,6 +9,7 @@ typealias CoinMarketCodeToDomain = com.neverdiesoul.domain.model.CoinMarketCode
 typealias CoinCurrentPriceToDomain = com.neverdiesoul.domain.model.CoinCurrentPrice
 typealias CoinOrderBookPriceToDomain = com.neverdiesoul.domain.model.CoinOrderBookPrice
 typealias CoinOrderBookUnitToDomain = com.neverdiesoul.domain.model.CoinOrderBookUnit
+typealias CoinCandleChartDataToDomain = com.neverdiesoul.domain.model.CoinCandleChartData
 
 object Mapper {
     fun List<CoinMarketCodeEntity>.toDomainCoinMarketCode(): List<CoinMarketCodeToDomain> {
@@ -62,6 +64,28 @@ object Mapper {
                         bidSize = it.bidSize
                     )
                 }
+            )
+        }
+    }
+    fun List<ResponseCoinCandleChartData>.toDomainCoinCandleChartData(): List<CoinCandleChartDataToDomain> {
+        return this.map { coinCandleChartData->
+            CoinCandleChartDataToDomain(
+                market = coinCandleChartData.market,
+                candleDateTimeUtc = coinCandleChartData.candleDateTimeUtc,
+                candleDateTimeKst = coinCandleChartData.candleDateTimeKst,
+                openingPrice = coinCandleChartData.openingPrice,
+                highPrice = coinCandleChartData.highPrice,
+                lowPrice = coinCandleChartData.lowPrice,
+                tradePrice = coinCandleChartData.tradePrice,
+                timestamp = coinCandleChartData.timestamp,
+                candleAccTradePrice = coinCandleChartData.candleAccTradePrice,
+                candleAccTradeVolume = coinCandleChartData.candleAccTradeVolume,
+                unit = coinCandleChartData.unit,
+                firstDayOfPeriod = coinCandleChartData.firstDayOfPeriod,
+                prevClosingPrice = coinCandleChartData.prevClosingPrice,
+                changePrice = coinCandleChartData.changePrice,
+                changeRate = coinCandleChartData.changeRate,
+                convertedTradePrice = coinCandleChartData.convertedTradePrice
             )
         }
     }

@@ -16,7 +16,7 @@
 - 실시간 코인정보는 WebSocket을 적용하여 수신 받도록 하고 있음
 - MPAndroidChart 라이브러리를 활용하여 Candle Chart 적용
 - 일부 화면은 웹뷰를 통해서도 볼 수 있도록 웹 프론트 화면을 개발예정
-  (웹뷰 자바스크립트 인터페이스를 통해 네이티브와 연동)
+  npm기반 프론트 개발환경을 잡아서 그곳에서 타입스크립트 기반으로 리액트로 개발해 볼 예정
 
 # 사용 기술 
 - Clean Architecture(Data-Domain-Presentation)
@@ -127,6 +127,8 @@
   - [참고 URL](https://jizard.tistory.com/241)
   - [참고 URL](https://github.com/PhilJay/MPAndroidChart)  -> maven { url "https://jitpack.io" }을 settings.gradle에 추가해야 한다
   - [참고 URL](https://jeongupark-study-house.tistory.com/159)
+- 2023년 8월 23일
+  1. MPAndroidChart 라이브러리를 활용하여 상세화면 차트 탭에 Candle Chart 적용하여 개발 중
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요

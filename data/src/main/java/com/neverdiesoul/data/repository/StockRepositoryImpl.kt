@@ -1,10 +1,12 @@
 package com.neverdiesoul.data.repository
 
 import android.util.Log
+import com.neverdiesoul.data.mapper.Mapper.toDomainCoinCandleChartData
 import com.neverdiesoul.data.mapper.Mapper.toDomainCoinCurrentPrice
 import com.neverdiesoul.data.mapper.Mapper.toDomainCoinOrderBookPrice
 import com.neverdiesoul.data.repository.local.StockLocalDataSource
 import com.neverdiesoul.data.repository.remote.StockRemoteDataSource
+import com.neverdiesoul.domain.model.CoinCandleChartData
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
@@ -89,6 +91,12 @@ class StockRepositoryImpl @Inject constructor(
     override fun getCoinOrderBookPriceFromRemote(markets: List<String>): Flow<List<CoinOrderBookPrice>> = flow {
         stockRemoteDataSource.getCoinOrderBookPriceFromRemote(markets).collect {
             emit(it.toDomainCoinOrderBookPrice())
+        }
+    }
+
+    override fun getCoinCandleChartDataFromRemote(type: String, unit: String, market: String, to: String, count: Int, convertingPriceUnit: String): Flow<List<CoinCandleChartData>> = flow {
+        stockRemoteDataSource.getCoinCandleChartDataFromRemote(type,unit,market,to,count,convertingPriceUnit).collect {
+            emit(it.toDomainCoinCandleChartData())
         }
     }
 }

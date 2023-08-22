@@ -103,4 +103,7 @@ dependencies {
 
     // Constraintlayout
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // MPAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

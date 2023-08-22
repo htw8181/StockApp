@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.neverdiesoul.data.api.ApiClient
 import com.neverdiesoul.data.api.ApiInterface
+import com.neverdiesoul.data.model.ResponseCoinCandleChartData
 import com.neverdiesoul.data.model.ResponseCoinCurrentPrice
 import com.neverdiesoul.data.model.ResponseCoinMarketCode
 import com.neverdiesoul.data.model.ResponseCoinOrderBookPrice
@@ -118,6 +119,27 @@ class StockRemoteDataSourceImpl @Inject constructor(private val okHttpClient: Ok
                 }
             } catch (e: Exception) {
                 Log.d(tag, "코인 호가 수신 에러 ${e.message}")
+            }
+        }
+    }
+
+    override fun getCoinCandleChartDataFromRemote(type: String, unit: String, market: String, to: String, count: Int, convertingPriceUnit: String): Flow<List<ResponseCoinCandleChartData>> {
+        val funcName = object{}.javaClass.enclosingMethod.name
+        return flow {
+            try {
+                val response = retrofitService.getCoinCandleChartDataFromRemote(type,unit,market,to,count,convertingPriceUnit)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        it.forEach { responseCoinCandleChartData ->
+                            Log.d(tag, "$funcName collect data -> $responseCoinCandleChartData")
+                        }
+                        emit(it)
+                    }
+                } else {
+                    Log.d(tag, "코인 캔들 차트 데이터 수신 에러 ${response.code()} : ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.d(tag, "코인 캔들 차트 데이터 수신 에러 ${e.message}")
             }
         }
     }

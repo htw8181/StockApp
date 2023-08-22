@@ -1,5 +1,6 @@
 package com.neverdiesoul.domain.repository
 
+import com.neverdiesoul.domain.model.CoinCandleChartData
 import com.neverdiesoul.domain.model.CoinCurrentPrice
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
@@ -15,4 +16,5 @@ interface StockRepository {
     fun requestRealTimeCoinData(upbitTypeList: List<UpbitType>)
     fun getCoinCurrentPriceFromRemote(markets: List<String>): Flow<List<CoinCurrentPrice>>
     fun getCoinOrderBookPriceFromRemote(markets: List<String>): Flow<List<CoinOrderBookPrice>>
+    fun getCoinCandleChartDataFromRemote(type: String, unit: String, market: String, to: String, count: Int, convertingPriceUnit: String): Flow<List<CoinCandleChartData>>
 }

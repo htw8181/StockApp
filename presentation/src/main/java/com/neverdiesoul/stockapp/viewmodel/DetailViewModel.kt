@@ -9,9 +9,11 @@ import com.neverdiesoul.data.repository.remote.websocket.RealTimeDataType
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinCurrentPrice
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinOrderBookPrice
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeDataType
+import com.neverdiesoul.domain.model.CoinCandleChartData
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
 import com.neverdiesoul.domain.model.UpbitType
+import com.neverdiesoul.domain.usecase.GetCoinCandleChartDataFromRemoteUseCase
 import com.neverdiesoul.domain.usecase.GetCoinOrderBookPriceFromRemoteUseCase
 import com.neverdiesoul.domain.usecase.RequestRealTimeCoinDataUseCase
 import com.neverdiesoul.domain.usecase.TryConnectionToGetRealTimeCoinDataUseCase
@@ -26,12 +28,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.ByteString
 import javax.inject.Inject
-
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     private val getCoinOrderBookPriceFromRemoteUseCase: GetCoinOrderBookPriceFromRemoteUseCase,
     tryConnectionToGetRealTimeCoinDataUseCase: TryConnectionToGetRealTimeCoinDataUseCase,
-    requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase
+    requestRealTimeCoinDataUseCase: RequestRealTimeCoinDataUseCase,
+    private val getCoinCandleChartDataFromRemoteUseCase: GetCoinCandleChartDataFromRemoteUseCase
 ) : BaseRealTimeViewModel(tryConnectionToGetRealTimeCoinDataUseCase,requestRealTimeCoinDataUseCase) {
 
     private var _coinOrderBookPrices: MutableLiveData<List<CoinOrderBookPrice>> = MutableLiveData(mutableListOf())
@@ -49,6 +51,9 @@ class DetailViewModel @Inject constructor(
     )
     val coinOrderBookPriceForViewSharedFlow = _coinOrderBookPriceForViewSharedFlow.asSharedFlow()
 
+    private var _coinCandleChartDataList: MutableLiveData<List<CoinCandleChartData>> = MutableLiveData(mutableListOf())
+    val coinCandleChartDataList: LiveData<List<CoinCandleChartData>> = _coinCandleChartDataList
+
     enum class TabGroup(val resId: Int) {
         ORDER(R.string.detail_tab_order),
         HOGA_ORDER(R.string.detail_tab_hoga),
@@ -61,6 +66,13 @@ class DetailViewModel @Inject constructor(
         BUY(R.string.detail_buy_tab),
         SELL(R.string.detail_sell_tab),
         TRANSACTION(R.string.detail_transaction_tab)
+    }
+
+    enum class CandleDataRequestType(val value: String) {
+        MINUTE("minutes"),
+        DAYS("days"),
+        WEEKS("weeks"),
+        MONTHS("months")
     }
 
     companion object {
@@ -127,4 +139,21 @@ class DetailViewModel @Inject constructor(
     fun requestRealTimeCoinData(coinMarketCode: CoinMarketCode) {
         requestRealTimeCoinDataUseCase(listOf(UpbitType(RealTimeDataType.TICKER.type, listOf(coinMarketCode.market)),UpbitType(RealTimeDataType.ORDERBOOK.type, listOf(coinMarketCode.market))))
     }
+
+    fun getCoinCandleChartDataFromRemote(type: String, unit: String, market: String, to: String, count: Int, convertingPriceUnit: String) {
+        val funcName = object{}.javaClass.enclosingMethod?.name
+        viewModelScope.launch {
+            getCoinCandleChartDataFromRemoteUseCase(type,unit,market,to,count,convertingPriceUnit)
+                .onStart { Log.d(tag,"$funcName onStart")  }
+                .onCompletion { Log.d(tag,"$funcName onCompletion") }
+                .catch { Log.d(tag,"Error!! $funcName -> $it") }
+                .collect { coinCandleChartDataList ->
+                    coinCandleChartDataList.forEach { coinCandleChartData ->
+                        Log.d(tag, "$funcName collect data -> $coinCandleChartData")
+                    }
+                    _coinCandleChartDataList.value = coinCandleChartDataList.reversed()
+                }
+        }
+    }
 }
+
