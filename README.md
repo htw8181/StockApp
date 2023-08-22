@@ -1,11 +1,22 @@
 # StockApp
 
+# 개발목적
+- 휴직기간 동안 공부한 코틀린,젯팩 컴포즈,자바스크립트,타입스크립트를 활용해 보기 위해 개인 프로젝트를 해보게 되었음
+
 # 개발내용
-- 코틀린과 젯팩 컴포즈를 활용하여 실시간 주식 화면을 개발
-- 네이티브가 아닌 웹뷰를 통해서도 실시간 주식 화면을 볼 수 있도록 웹 프론트 화면을 개발
+- 업비트 API를 활용하여 업비트 App의 메인 & 상세 화면을 개발
+- 코틀린을 주 언어로 활용
+- Clean Architecture 기반으로 앱의 구조를 잡았으며, Data-Domain-Presentation 모듈 레이어를 구성 
+- Dagger Hilt를 활용하여 클래스 프로퍼티가 객체형인 경우 의존성 주입으로 생성되도록 함
+- 젯팩 컴포즈를 활용하여 UI 화면을 개발 중
+- 앱 실행 초기에 마켓 코드를 서버로부터 전달받아 RoomDB로 저장함
+- 비동기 처리는 Coroutine을 활용함
+- 현재가 조회, 호가 조회 등 서버 연동에 필요한 API 통신은 Retrofit을 적용하였고, 결과처리를 위해 LiveData와 Flow를 적절히 활용함
+  주로 1회성 조회는 LiveData를 활용하였고, 실시간 코인정보들은 Flow를 활용하였음.
+- 실시간 코인정보는 WebSocket을 적용하여 수신 받도록 하고 있음
+- MPAndroidChart 라이브러리를 활용하여 Candle Chart 적용
+- 일부 화면은 웹뷰를 통해서도 볼 수 있도록 웹 프론트 화면을 개발예정
   (웹뷰 자바스크립트 인터페이스를 통해 네이티브와 연동)
-- 실시간 주식 외에 별도로 API(매수,매도 ...)를 구하기가 어려우니, 
-  실제 매수,매도 등의 서버 연동은 생략하고, Room DB를 통해 데이터를 처리하려 예정..
 
 # 사용 기술 
 - Clean Architecture(Data-Domain-Presentation)
@@ -16,7 +27,7 @@
 - LiveData & Flow
 - WebSocket
 - RoomDB
-- Chart?? (사용 예정)
+- Chart
 - Google Material Design (사용 예정)
 - Retrofit
 
@@ -110,6 +121,12 @@
 - 2023년 8월 21일
   1. 상세화면 호가 탭 구성 - Compose에서 예전 AndroidView를 사용해보려 함 [참고 URL](https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose?hl=ko)
   2. 상세화면 호가 탭에 AndroidView를 구성하고 웹뷰를 배치 - 추후, 호가 정보는 웹으로 개발한 소스를 GitHub(무료호스팅)에 배포하여 웹뷰로 볼 수 있도록 할 예정
+- 2023년 8월 22일
+  1. 상세화면 차트 탭 구성을 위한 스터디
+  - [참고 URL](https://jizard.tistory.com/240)
+  - [참고 URL](https://jizard.tistory.com/241)
+  - [참고 URL](https://github.com/PhilJay/MPAndroidChart)  -> maven { url "https://jitpack.io" }을 settings.gradle에 추가해야 한다
+  - [참고 URL](https://jeongupark-study-house.tistory.com/159)
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
