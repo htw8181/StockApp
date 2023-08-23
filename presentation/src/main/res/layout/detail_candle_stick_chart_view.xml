@@ -6,15 +6,7 @@
     <com.github.mikephil.charting.charts.CandleStickChart
         android:id="@+id/chart_candle_stick"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintVertical_weight="6"
+        android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/chart_bar"/>
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/chart_bar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintVertical_weight="4"
-        app:layout_constraintTop_toBottomOf="@id/chart_candle_stick"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBaseline_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

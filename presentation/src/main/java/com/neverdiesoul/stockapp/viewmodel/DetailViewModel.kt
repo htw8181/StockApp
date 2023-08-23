@@ -51,6 +51,9 @@ class DetailViewModel @Inject constructor(
     )
     val coinOrderBookPriceForViewSharedFlow = _coinOrderBookPriceForViewSharedFlow.asSharedFlow()
 
+    private var _coinLineChartDataList: MutableLiveData<List<CoinCandleChartData>> = MutableLiveData(mutableListOf())
+    val coinLineChartDataList: LiveData<List<CoinCandleChartData>> = _coinLineChartDataList
+
     private var _coinCandleChartDataList: MutableLiveData<List<CoinCandleChartData>> = MutableLiveData(mutableListOf())
     val coinCandleChartDataList: LiveData<List<CoinCandleChartData>> = _coinCandleChartDataList
 
@@ -73,6 +76,13 @@ class DetailViewModel @Inject constructor(
         DAYS("days"),
         WEEKS("weeks"),
         MONTHS("months")
+    }
+
+    /**
+     * 분 단위. 1, 3, 5, 15, 10, 30, 60, 240
+     */
+    enum class CandleDataRequestUnitType(val unit: String) {
+        Unit1("1"), Unit3("3"), Unit5("5"), Unit15("15"), Unit10("10"), Unit30("30"), Unit60("60"), Unit240("240")
     }
 
     companion object {
@@ -138,6 +148,22 @@ class DetailViewModel @Inject constructor(
 
     fun requestRealTimeCoinData(coinMarketCode: CoinMarketCode) {
         requestRealTimeCoinDataUseCase(listOf(UpbitType(RealTimeDataType.TICKER.type, listOf(coinMarketCode.market)),UpbitType(RealTimeDataType.ORDERBOOK.type, listOf(coinMarketCode.market))))
+    }
+
+    fun getCoinLineChartDataFromRemote(market: String, to: String, count: Int, convertingPriceUnit: String) {
+        val funcName = object{}.javaClass.enclosingMethod?.name
+        viewModelScope.launch {
+            getCoinCandleChartDataFromRemoteUseCase(CandleDataRequestType.MINUTE.value,CandleDataRequestUnitType.Unit5.unit,market,to,count,convertingPriceUnit)
+                .onStart { Log.d(tag,"$funcName onStart")  }
+                .onCompletion { Log.d(tag,"$funcName onCompletion") }
+                .catch { Log.d(tag,"Error!! $funcName -> $it") }
+                .collect { coinCandleChartDataList ->
+                    coinCandleChartDataList.forEach { coinCandleChartData ->
+                        Log.d(tag, "$funcName collect data -> $coinCandleChartData")
+                    }
+                    _coinLineChartDataList.value = coinCandleChartDataList.reversed()
+                }
+        }
     }
 
     fun getCoinCandleChartDataFromRemote(type: String, unit: String, market: String, to: String, count: Int, convertingPriceUnit: String) {

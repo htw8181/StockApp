@@ -129,6 +129,8 @@
   - [참고 URL](https://jeongupark-study-house.tistory.com/159)
 - 2023년 8월 23일
   1. MPAndroidChart 라이브러리를 활용하여 상세화면 차트 탭에 Candle Chart 적용하여 개발 중
+- 2023년 8월 24일
+  1. MPAndroidChart 라이브러리를 활용하여 상세화면 LineChart, CandleChart, BarChart 적용
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
@@ -152,3 +154,4 @@
     [참고 URL](https://witcheryoon.tistory.com/316)
   6. webView content 개발시에는 예전 xml 사용하는 방식으로 compose에 붙여볼 생각인데, [참고 URL](https://developer.android.com/jetpack/compose/interop/interop-apis?hl=ko)을 보며 해볼 예정.
   7. compose layout align은 [참고 URL](https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary#Column(androidx.compose.ui.Modifier,androidx.compose.foundation.layout.Arrangement.Vertical,androidx.compose.ui.Alignment.Horizontal,kotlin.Function1))
+  8. 코인거래소 회사들이 차트 라이브러리를 무얼 쓰나 봤더니, 업비트는 ChartIQ, 빗썸은 TradingView 라는 차트 라이브러리를 쓰는 것 같다. 추후, 검토해봐야겠다. 모바일용으로는 안보이는데,. 그러면 웹 소스 개발시 적용해봐야겠다.  

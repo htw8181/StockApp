@@ -2,7 +2,6 @@ package com.neverdiesoul.stockapp.view.composable.navigation
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.Paint
 import android.util.Log
 import android.view.View
 import android.webkit.WebChromeClient
@@ -55,23 +54,16 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.CandleData
-import com.github.mikephil.charting.data.CandleDataSet
-import com.github.mikephil.charting.data.CandleEntry
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.neverdiesoul.data.repository.remote.websocket.UpbitRealTimeCoinOrderBookPrice
-import com.neverdiesoul.domain.model.CoinCandleChartData
 import com.neverdiesoul.domain.model.CoinMarketCode
 import com.neverdiesoul.domain.model.CoinOrderBookPrice
 import com.neverdiesoul.stockapp.R
-import com.neverdiesoul.stockapp.databinding.DetailChartTabViewBinding
 import com.neverdiesoul.stockapp.databinding.DetailHogaTabViewBinding
 import com.neverdiesoul.stockapp.ui.theme.StockAppTheme
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailBarChartView
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailCandleStickChartView
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailCurrentPriceItem
+import com.neverdiesoul.stockapp.view.composable.navigation.detail.DetailLineChartView
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBookPriceItem
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBottomSheet
 import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderBuyTabContent
@@ -88,8 +80,6 @@ import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.TabGroup
 import com.neverdiesoul.stockapp.viewmodel.model.CoinCurrentPriceForView
 import com.neverdiesoul.stockapp.viewmodel.model.CoinOrderbookUnitForDetailView
 import java.util.*
-
-typealias ChartColor = android.graphics.Color
 
 private const val TAG = "NavDetailView"
 @SuppressLint("SetJavaScriptEnabled")
@@ -154,21 +144,18 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                     bottom = paddingValues.calculateBottomPadding()
                 ))
             {
-                Row(modifier = Modifier
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight())
                 {
                     Column(modifier = Modifier
-                        .weight(0.5f, true)
+                        .weight(0.65f, true)
+                        .wrapContentHeight()
                         .padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 10.dp)) {
                         DetailCurrentPriceItem(realTimeCoinCurrentPrice)
                     }
 
-                    Box(modifier = Modifier
-                        .weight(0.5f, true)
-                        .align(Alignment.CenterVertically)) {
-                        Text(text = "Chart Area..", modifier = Modifier.align(Alignment.Center))
-                    }
+                    DetailLineChartView(modifier = Modifier.weight(0.35f, true).padding(end = 10.dp), viewModel = viewModel)
                 }
                 Row {
                     TabRow(selectedTabIndex = selectedTabIndex,
@@ -285,89 +272,8 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                         })
                     }
                     CHART_STATE -> {
-                        val coinCandleChartDataList: List<CoinCandleChartData> by viewModel.coinCandleChartDataList.observeAsState(initial = mutableListOf())
-                        AndroidViewBinding(factory = DetailChartTabViewBinding::inflate, modifier = Modifier.fillMaxSize()) {
-                            Log.d(TAG,"AndroidViewBinding DetailChartTabViewBinding Candle Chart!!")
-                            if (coinCandleChartDataList.isNullOrEmpty()) return@AndroidViewBinding
-                            val entries = ArrayList<CandleEntry>()
-                            coinCandleChartDataList.forEachIndexed { index, coinCandleChartData ->
-                                entries.add(
-                                    CandleEntry(index.toFloat(),
-                                        coinCandleChartData.highPrice?.toFloat() ?: 0.0f,
-                                        coinCandleChartData.lowPrice?.toFloat() ?: 0.0f,
-                                        coinCandleChartData.openingPrice?.toFloat()  ?: 0.0f,
-                                        coinCandleChartData.tradePrice?.toFloat() ?: 0.0f)
-                                )
-                            }
-
-                            val dataSet = CandleDataSet(entries, "").apply {
-                                // 심지 부분
-                                shadowColor = ChartColor.LTGRAY
-                                shadowWidth = 1F
-
-                                // 음봄
-                                decreasingColor = ChartColor.BLUE
-                                decreasingPaintStyle = Paint.Style.FILL
-                                // 양봉
-                                increasingColor = ChartColor.RED
-                                increasingPaintStyle = Paint.Style.FILL
-
-                                neutralColor = ChartColor.DKGRAY
-                                setDrawValues(false)
-                                // 터치시 노란 선 제거
-                                //highLightColor = ChartColor.TRANSPARENT
-                            }
-
-                            // 왼쪽 Y 축
-                            chartCandleStick.axisLeft.run {
-                                this.isEnabled = false
-                            }
-
-                            // 오른쪽 Y 축
-                            chartCandleStick.axisRight.run {
-                                isEnabled = true
-                            }
-
-                            // X 축
-                            chartCandleStick.xAxis.run {
-                                position = XAxis.XAxisPosition.BOTTOM
-                                setDrawAxisLine(true)
-                                setDrawGridLines(true)
-                                setLabelCount(5,true)
-                                valueFormatter = object : ValueFormatter() {
-                                    override fun getFormattedValue(value: Float): String {
-                                        return  coinCandleChartDataList[value.toInt()].candleDateTimeKst?.substring(0,10) ?: "empty"
-                                    }
-                                }
-                            }
-
-                            // 범례
-                            chartCandleStick.legend.run {
-                                isEnabled = false
-                            }
-                            chartCandleStick.setMaxVisibleValueCount(100)
-                            chartCandleStick.apply {
-                                this.data = CandleData(dataSet)
-                                setDrawBorders(true)
-                                isScaleYEnabled = false
-                                setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                                    override fun onValueSelected(e: Entry?, h: Highlight?) {
-                                        Log.d(TAG,"$e , $h");
-
-                                    }
-
-                                    override fun onNothingSelected() {
-
-                                    }
-                                })
-                                description.isEnabled = false
-                                //isHighlightPerDragEnabled = false
-                                //isHighlightPerTapEnabled = false
-
-                                //requestDisallowInterceptTouchEvent(true)
-                                invalidate()
-                            }
-                        }
+                        DetailCandleStickChartView(modifier = Modifier.weight(0.6f,true),viewModel = viewModel)
+                        DetailBarChartView(modifier = Modifier.weight(0.4f,true),viewModel = viewModel)
                     }
                     else -> {
                         Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
@@ -397,6 +303,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
         viewModel.setViewEvent(object : BaseRealTimeViewModel.ViewEvent {
             override fun viewOnReady() {
                 viewModel.getCoinOrderBookPriceFromRemote(listOf(coinMarketCode.market))
+                viewModel.getCoinLineChartDataFromRemote(market = coinMarketCode.market, to = "", count = 200, convertingPriceUnit = "")
             }
 
             override fun viewOnExit() {
