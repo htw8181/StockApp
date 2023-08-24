@@ -48,5 +48,10 @@
     <string name="order_bottom_sheet_button_maximum">최대</string>
     <string name="order_bottom_sheet_button_reset">초기화</string>
     <string name="order_bottom_sheet_button_confirm">획인</string>
+    <string name="open_price">시가</string>
+    <string name="high_price">고가</string>
+    <string name="low_price">저가</string>
+    <string name="close_price">종가</string>
+    <string name="trade_amount">거래량</string>
     <string name="title_activity_test">TestActivity</string>
 </resources>
