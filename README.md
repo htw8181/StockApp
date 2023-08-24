@@ -131,6 +131,9 @@
   1. MPAndroidChart 라이브러리를 활용하여 상세화면 차트 탭에 Candle Chart 적용하여 개발 중
 - 2023년 8월 24일
   1. MPAndroidChart 라이브러리를 활용하여 상세화면 LineChart, CandleChart, BarChart 적용
+  2. Intro 화면에 Lottie 이미지 적용(무료 이미지 적용 from https://lottiefiles.com/)
+  - [참고 URL](https://lottiefiles.com/kr/blog/about-lottie/kr-getting-started-with-lottie-animations-in-android-app)
+  - [참고 URL](https://velog.io/@heyday_7/Compose%EC%97%90%EC%84%9C-%EB%A1%9C%ED%8B%B0Lottie%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%B4%EC%84%9C-%EC%95%B1-%EC%98%A8%EB%B3%B4%EB%94%A9-%EC%9E%91%EC%97%85%ED%95%98%EA%B8%B0)
 # 비고 & 특이사항
   1. 메인화면에서 KRW/BTC/USDT에 따라 실시간 코인 정보 LazyColumn으로 실시간 업데이트 처리
   - MainViewModel 에서 실시간 코인 정보 보내면 Main에서 늦게 받는 경우가 있는 이슈 처리 필요
