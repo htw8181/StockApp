@@ -3,6 +3,31 @@
 # 개발목적
 - 휴직기간 동안 공부한 코틀린,젯팩 컴포즈,자바스크립트,타입스크립트를 활용해 보기 위해 개인 프로젝트를 해보게 되었음
 
+![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white)
+![Compose](https://img.shields.io/badge/JetpackCompose-blue)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?logo=javascript&logoColor=%23F7DF1E)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?logo=typescript&logoColor=white)
+
+# 공부한 책
+
+<div style="clear:left;text-align:left;">
+<a href="http://www.yes24.com/Product/Goods/74035266" style="display:inline-block;overflow:hidden;border:solid 1px #ccc;" target="_blank">
+<img style="margin:-1px;vertical-align:top;" src="http://image.yes24.com/goods/74035266/M" border="0" ></a>
+
+<a href="https://www.yes24.com/Product/Goods/107698728" style="display:inline-block;overflow:hidden;border:solid 1px #ccc;" target="_blank">
+<img style="margin:-1px;vertical-align:top;" src="http://image.yes24.com/goods/107698728/M" border="0" ></a>
+
+<a href="https://www.yes24.com/Product/Goods/115991126" style="display:inline-block;overflow:hidden;border:solid 1px #ccc;" target="_blank">
+<img style="margin:-1px;vertical-align:top;" src="http://image.yes24.com/goods/115991126/M" border="0" ></a>
+
+<a href="https://www.yes24.com/Product/Goods/92742567" style="display:inline-block;overflow:hidden;border:solid 1px #ccc;" target="_blank">
+<img style="margin:-1px;vertical-align:top;" src="http://image.yes24.com/goods/92742567/M" border="0" ></a>
+
+<a href="https://www.yes24.com/Product/Goods/119410497" style="display:inline-block;overflow:hidden;border:solid 1px #ccc;" target="_blank">
+<img style="margin:-1px;vertical-align:top;" src="http://image.yes24.com/goods/119410497/M" border="0" ></a>
+
+</div>
+
 # 개발내용
 - 업비트 API를 활용하여 업비트 App의 메인 & 상세 화면을 개발
 - 코틀린을 주 언어로 활용
@@ -21,7 +46,7 @@
 # 사용 기술 
 - Clean Architecture(Data-Domain-Presentation)
 - Jetpack Compose
-- WebView(HTML,CSS,JavaScript) (사용 예정)
+- WebView(HTML,CSS,JavaScript,TypeScript) (사용 예정)
 - Dagger Hilt
 - Coroutine
 - LiveData & Flow
@@ -30,6 +55,7 @@
 - Chart
 - Google Material Design (사용 예정)
 - Retrofit
+- Lottie
 
 # 개발일지
 - 2023년 7월 19일,21일
@@ -157,4 +183,5 @@
     [참고 URL](https://witcheryoon.tistory.com/316)
   6. webView content 개발시에는 예전 xml 사용하는 방식으로 compose에 붙여볼 생각인데, [참고 URL](https://developer.android.com/jetpack/compose/interop/interop-apis?hl=ko)을 보며 해볼 예정.
   7. compose layout align은 [참고 URL](https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary#Column(androidx.compose.ui.Modifier,androidx.compose.foundation.layout.Arrangement.Vertical,androidx.compose.ui.Alignment.Horizontal,kotlin.Function1))
-  8. 코인거래소 회사들이 차트 라이브러리를 무얼 쓰나 봤더니, 업비트는 ChartIQ, 빗썸은 TradingView 라는 차트 라이브러리를 쓰는 것 같다. 추후, 검토해봐야겠다. 모바일용으로는 안보이는데,. 그러면 웹 소스 개발시 적용해봐야겠다.  
+  8. 코인거래소 회사들이 차트 라이브러리를 무얼 쓰나 봤더니, 업비트는 ChartIQ, 빗썸은 TradingView 라는 차트 라이브러리를 쓰는 것 같다. 추후, 검토해봐야겠다. 모바일용으로는 안보이는데,. 그러면 웹 소스 개발시 적용해봐야겠다.
+  9. README 파일에 아이콘 뱃지는 [참고 URL](https://github.com/Ileriayo/markdown-badges)을 참고하여 적용한다. 
