@@ -71,18 +71,18 @@ class DetailViewModel @Inject constructor(
         TRANSACTION(R.string.detail_transaction_tab)
     }
 
-    enum class CandleDataRequestType(val value: String) {
-        MINUTE("minutes"),
-        DAYS("days"),
-        WEEKS("weeks"),
-        MONTHS("months")
+    enum class CandleDataRequestType(val value: String, val tapNameResId: Int) {
+        MINUTE("minutes",R.string.minute),
+        DAYS("days",R.string.days),
+        WEEKS("weeks",R.string.week),
+        MONTHS("months",R.string.month)
     }
 
     /**
      * 분 단위. 1, 3, 5, 15, 10, 30, 60, 240
      */
     enum class CandleDataRequestUnitType(val unit: String) {
-        Unit1("1"), Unit3("3"), Unit5("5"), Unit15("15"), Unit10("10"), Unit30("30"), Unit60("60"), Unit240("240")
+        Unit1("1"), Unit3("3"), Unit5("5"), Unit10("10"), Unit15("15"), Unit30("30"), Unit60("60"), Unit240("240")
     }
 
     companion object {

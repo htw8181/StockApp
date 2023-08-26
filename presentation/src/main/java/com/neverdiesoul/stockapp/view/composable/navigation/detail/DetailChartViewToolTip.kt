@@ -30,7 +30,7 @@ fun DetailChartViewToolTip(selectedCoinCandleChartData: CoinCandleChartData) {
         .padding(10.dp)) {
 
         Row {
-            Text(text = selectedCoinCandleChartData.candleDateTimeKst?.substring(0,10) ?: "", style = TextStyle(color = Color.White))
+            Text(text = selectedCoinCandleChartData.candleDateTimeKst?.replace("T"," ") ?: "", style = TextStyle(color = Color.White))
         }
         Row {
             var changeRate = "0.00"

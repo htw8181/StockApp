@@ -32,6 +32,9 @@ fun DetailBarChartView(modifier: Modifier = Modifier, viewModel: DetailViewModel
     var selectedCoinCandleChartData: CoinCandleChartData? by remember {
         mutableStateOf(null)
     }
+    var initialized by remember {
+        mutableStateOf(false)
+    }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -67,65 +70,79 @@ fun DetailBarChartView(modifier: Modifier = Modifier, viewModel: DetailViewModel
                 highLightColor = ChartColor.TRANSPARENT
             }
 
-            // 왼쪽 Y 축
-            chartBar.axisLeft.run {
-                this.isEnabled = false
-            }
-
-            // 오른쪽 Y 축
-            chartBar.axisRight.run {
-                isEnabled = true
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        val candleAccTradeVolume = DecimalFormat("#,###.###").apply { roundingMode = RoundingMode.HALF_UP }.format(value).let { result->
-                            if (result == "0") "0.000" else result
-                        }
-                        return  candleAccTradeVolume ?: "0.000"
-                    }
+            if (!initialized) {
+                // 왼쪽 Y 축
+                chartBar.axisLeft.run {
+                    this.isEnabled = false
                 }
-            }
 
-            // X 축
-            chartBar.xAxis.run {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawAxisLine(true)
-                setDrawGridLines(true)
-                setLabelCount(5,true)
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return  coinCandleChartDataList[value.toInt()].candleDateTimeKst?.substring(0,10) ?: "empty"
-                    }
-                }
-            }
-
-            // 범례
-            chartBar.legend.run {
-                isEnabled = false
-            }
-            chartBar.apply {
-                data = BarData(dataSet)
-                setDrawBorders(true)
-                isScaleYEnabled = false
-                setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                    override fun onValueSelected(e: Entry?, h: Highlight?) {
-                        Log.d(funcName,"$e , $h")
-                        h?.let {
-                            selectedCoinCandleChartData = coinCandleChartDataList[h.x.toInt()]
+                // 오른쪽 Y 축
+                chartBar.axisRight.run {
+                    isEnabled = true
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            val candleAccTradeVolume = DecimalFormat("#,###.###").apply { roundingMode = RoundingMode.HALF_UP }.format(value).let { result->
+                                if (result == "0") "0.000" else result
+                            }
+                            return  candleAccTradeVolume ?: "0.000"
                         }
                     }
+                }
 
-                    override fun onNothingSelected() {
-                        Log.d(funcName,"onNothingSelected")
-                        selectedCoinCandleChartData = null
+                // X 축
+                chartBar.xAxis.run {
+                    position = XAxis.XAxisPosition.BOTTOM
+                    setDrawAxisLine(true)
+                    setDrawGridLines(true)
+                    setLabelCount(5,true)
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            val index = value.toInt()
+                            if (index >= coinCandleChartDataList.size) return "empty"
+                            return coinCandleChartDataList[index].candleDateTimeKst?.substring(0,10) ?: "empty"
+                        }
                     }
-                })
+                }
 
-                description.isEnabled = false
-                //isHighlightPerDragEnabled = false
-                //isHighlightPerTapEnabled = false
-                //requestDisallowInterceptTouchEvent(true)
-                zoom(10f,1f, centerOffsets.x * 2 ,0f)
-                invalidate()
+                // 범례
+                chartBar.legend.run {
+                    isEnabled = false
+                }
+                chartBar.apply {
+                    data = BarData(dataSet)
+                    setDrawBorders(true)
+                    isScaleYEnabled = false
+                    setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                        override fun onValueSelected(e: Entry?, h: Highlight?) {
+                            Log.d(funcName,"$e , $h")
+                            h?.let {
+                                selectedCoinCandleChartData = coinCandleChartDataList[h.x.toInt()]
+                            }
+                        }
+
+                        override fun onNothingSelected() {
+                            Log.d(funcName,"onNothingSelected")
+                            selectedCoinCandleChartData = null
+                        }
+                    })
+
+                    description.isEnabled = false
+                    //isHighlightPerDragEnabled = false
+                    //isHighlightPerTapEnabled = false
+                    //requestDisallowInterceptTouchEvent(true)
+                    zoom(10f,1f, centerOffsets.x * 2 ,0f)
+                    invalidate()
+                }
+                initialized = true
+            } else {
+                selectedCoinCandleChartData = null
+                chartBar.data = BarData(dataSet)
+                chartBar.data.notifyDataChanged()
+
+                chartBar.apply {
+                    notifyDataSetChanged()
+                    invalidate()
+                }
             }
 
             val viewPortHandler = chartBar.viewPortHandler

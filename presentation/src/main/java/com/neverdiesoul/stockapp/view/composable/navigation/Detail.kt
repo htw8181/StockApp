@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,8 +38,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +71,7 @@ import com.neverdiesoul.stockapp.view.composable.navigation.detail.OrderModalBot
 import com.neverdiesoul.stockapp.viewmodel.BaseRealTimeViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.CandleDataRequestType
+import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.CandleDataRequestUnitType
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.BUY_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.CHART_STATE
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel.Companion.HOGA_ORDER_STATE
@@ -90,6 +99,11 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
      */
     var selectedOrderTabIndex by remember { mutableStateOf(BUY_STATE) }
 
+    /**
+     * 분/일/주/월 차트 탭 인덱스
+     */
+    var selectedChartTabIndex by remember { mutableStateOf(CandleDataRequestType.DAYS.ordinal) }
+
     val realTimeCoinCurrentPrice by viewModel.coinCurrentPriceForViewSharedFlow.collectAsState(
         initial = CoinCurrentPriceForView()
     )
@@ -109,6 +123,30 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
 
     var showBottomSheetKeyboard by remember {
         mutableStateOf(false)
+    }
+
+    var isDropdownMenuExpandedForChartMinuteUnit by remember {
+        mutableStateOf(false)
+    }
+
+    val onChartTabClick: (Int)->Unit = { index ->
+        selectedChartTabIndex = index
+        val type = when(selectedChartTabIndex) {
+            CandleDataRequestType.MINUTE.ordinal -> CandleDataRequestType.MINUTE.value
+            CandleDataRequestType.DAYS.ordinal -> CandleDataRequestType.DAYS.value
+            CandleDataRequestType.WEEKS.ordinal -> CandleDataRequestType.WEEKS.value
+            CandleDataRequestType.MONTHS.ordinal -> CandleDataRequestType.MONTHS.value
+            else -> null
+        }
+        type?.let {
+            when(type) {
+                CandleDataRequestType.MINUTE.value -> isDropdownMenuExpandedForChartMinuteUnit = !isDropdownMenuExpandedForChartMinuteUnit
+                else -> {
+                    isDropdownMenuExpandedForChartMinuteUnit = false
+                    viewModel.getCoinCandleChartDataFromRemote(type = it, unit = "", market = coinMarketCode.market, to = "", count = 200, convertingPriceUnit = "")
+                }
+            }
+        }
     }
 
     Scaffold(
@@ -204,8 +242,99 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                         HogaOrderView(viewModel = viewModel)
                     }
                     CHART_STATE -> {
-                        DetailCandleStickChartView(modifier = Modifier.weight(0.6f,true),viewModel = viewModel)
-                        DetailBarChartView(modifier = Modifier.weight(0.4f,true),viewModel = viewModel)
+                        Box {
+                            var tabRowHeight by remember {
+                                mutableStateOf(0.dp)
+                            }
+                           Column {
+                               val selectedColor = Color(red = 9, green = 54, blue = 135)
+                               val density = LocalDensity.current
+                               TabRow(selectedTabIndex = selectedChartTabIndex,
+                                   modifier = Modifier
+                                       .fillMaxWidth(0.5f)
+                                       .border(
+                                           width = 1.dp,
+                                           color = Color.Gray,
+                                           shape = RectangleShape
+                                       ).onSizeChanged {
+                                           with(density) {
+                                               tabRowHeight = it.height.toDp()
+                                           }
+                                       },
+                                   containerColor = Color.White,
+                                   tabs = {
+                                       enumValues<CandleDataRequestType>().forEachIndexed { index, type ->
+                                           Tab(modifier = Modifier
+                                               .border(
+                                                   width = 2.dp,
+                                                   color = if (index == selectedChartTabIndex) selectedColor else Color.Transparent,
+                                                   shape = RectangleShape
+                                               )
+                                               .drawBehind {
+                                                   drawLine(
+                                                       Color.Gray,
+                                                       Offset(size.width, 0f),
+                                                       Offset(size.width, size.height),
+                                                       1.dp.toPx()
+                                                   )
+                                               },
+                                               selectedContentColor = selectedColor,
+                                               unselectedContentColor = Color.Gray,
+                                               selected = index == selectedChartTabIndex,
+                                               onClick = {
+                                                   onChartTabClick(index)
+                                               },
+                                               content = { Text(text = stringResource(id = type.tapNameResId), modifier = Modifier.padding(10.dp)) })
+                                       }
+                                   },
+                                   indicator = {}
+                               )
+                               DetailCandleStickChartView(modifier = Modifier.weight(0.6f,true),viewModel = viewModel)
+                               DetailBarChartView(modifier = Modifier.weight(0.4f,true),viewModel = viewModel)
+                           }
+
+                           if (isDropdownMenuExpandedForChartMinuteUnit) {
+                               Column(verticalArrangement = Arrangement.Top, modifier = Modifier.wrapContentSize().background(Color.Transparent).padding(top = tabRowHeight)) {
+                                   TabRow(selectedTabIndex = -1,
+                                       modifier = Modifier
+                                           .wrapContentWidth()
+                                           .background(Color.Blue)
+                                           .border(
+                                               width = 1.dp,
+                                               color = Color.Gray,
+                                               shape = RectangleShape
+                                           ),
+                                       containerColor = Color.White,
+                                       tabs = {
+                                           enumValues<CandleDataRequestUnitType>().forEachIndexed { index, value ->
+                                               Tab(modifier = Modifier
+                                                   .border(
+                                                       width = 2.dp,
+                                                       color = Color.Transparent,
+                                                       shape = RectangleShape
+                                                   )
+                                                   .drawBehind {
+                                                       drawLine(
+                                                           Color.Gray,
+                                                           Offset(size.width, 0f),
+                                                           Offset(size.width, size.height),
+                                                           1.dp.toPx()
+                                                       )
+                                                   },
+                                                   unselectedContentColor = Color.Gray,
+                                                   selected = false,
+                                                   onClick = {
+                                                       viewModel.getCoinCandleChartDataFromRemote(type = CandleDataRequestType.MINUTE.value, unit = value.unit, market = coinMarketCode.market, to = "", count = 200, convertingPriceUnit = "")
+                                                       isDropdownMenuExpandedForChartMinuteUnit = false
+                                                   },
+                                                   content = { Text(text = "${value.unit}${stringResource(id = R.string.minute)}", modifier = Modifier.padding(10.dp)) })
+                                           }
+                                       },
+                                       indicator = {}
+                                   )
+                               }
+                           }
+                        }
                     }
                     else -> {
                         Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
@@ -280,7 +409,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
     LaunchedEffect(selectedTabIndex) {
         when(selectedTabIndex) {
             CHART_STATE -> {
-                viewModel.getCoinCandleChartDataFromRemote(type = CandleDataRequestType.DAYS.value, unit = "", market = coinMarketCode.market, to = "", count = 200, convertingPriceUnit = "")
+                onChartTabClick(selectedChartTabIndex)
             }
             else -> {}
         }

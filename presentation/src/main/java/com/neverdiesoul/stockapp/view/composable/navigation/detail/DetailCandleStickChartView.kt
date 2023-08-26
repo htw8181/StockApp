@@ -33,6 +33,9 @@ fun DetailCandleStickChartView(modifier: Modifier = Modifier, viewModel: DetailV
     var selectedCoinCandleChartData: CoinCandleChartData? by remember {
         mutableStateOf(null)
     }
+    var initialized by remember {
+        mutableStateOf(false)
+    }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -71,58 +74,72 @@ fun DetailCandleStickChartView(modifier: Modifier = Modifier, viewModel: DetailV
                 highLightColor = ChartColor.TRANSPARENT
             }
 
-            // 왼쪽 Y 축
-            chartCandleStick.axisLeft.run {
-                this.isEnabled = false
-            }
-
-            // 오른쪽 Y 축
-            chartCandleStick.axisRight.run {
-                isEnabled = true
-            }
-
-            // X 축
-            chartCandleStick.xAxis.run {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawAxisLine(true)
-                setDrawGridLines(true)
-                setLabelCount(5,true)
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return  coinCandleChartDataList[value.toInt()].candleDateTimeKst?.substring(0,10) ?: "empty"
-                    }
+            if (!initialized) {
+                // 왼쪽 Y 축
+                chartCandleStick.axisLeft.run {
+                    this.isEnabled = false
                 }
-            }
 
-            // 범례
-            chartCandleStick.legend.run {
-                isEnabled = false
-            }
-            chartCandleStick.apply {
-                data = CandleData(dataSet)
-                setDrawBorders(true)
-                isScaleYEnabled = false
-                setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                    override fun onValueSelected(e: Entry?, h: Highlight?) {
-                        Log.d(funcName,"$e , $h")
-                        h?.let {
-                            selectedCoinCandleChartData = coinCandleChartDataList[h.x.toInt()]
-                            dataSet.highLightColor = ChartColor.rgb(255, 187, 115)
+                // 오른쪽 Y 축
+                chartCandleStick.axisRight.run {
+                    isEnabled = true
+                }
+
+                // X 축
+                chartCandleStick.xAxis.run {
+                    position = XAxis.XAxisPosition.BOTTOM
+                    setDrawAxisLine(true)
+                    setDrawGridLines(true)
+                    setLabelCount(5,true)
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            val index = value.toInt()
+                            if (index >= coinCandleChartDataList.size) return "empty"
+                            return coinCandleChartDataList[index].candleDateTimeKst?.substring(0,10) ?: "empty"
                         }
                     }
+                }
 
-                    override fun onNothingSelected() {
-                        Log.d(funcName,"onNothingSelected")
-                        selectedCoinCandleChartData = null
-                    }
-                })
-                description.isEnabled = false
-                //isHighlightPerDragEnabled = false
-                //isHighlightPerTapEnabled = false
+                // 범례
+                chartCandleStick.legend.run {
+                    isEnabled = false
+                }
+                chartCandleStick.apply {
+                    data = CandleData(dataSet)
+                    setDrawBorders(true)
+                    isScaleYEnabled = false
+                    setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                        override fun onValueSelected(e: Entry?, h: Highlight?) {
+                            Log.d(funcName,"$e , $h")
+                            h?.let {
+                                selectedCoinCandleChartData = coinCandleChartDataList[h.x.toInt()]
+                                dataSet.highLightColor = ChartColor.rgb(255, 187, 115)
+                            }
+                        }
 
-                //requestDisallowInterceptTouchEvent(true)
-                zoom(10f,1f, centerOffsets.x * 2 ,0f)
-                invalidate()
+                        override fun onNothingSelected() {
+                            Log.d(funcName,"onNothingSelected")
+                            selectedCoinCandleChartData = null
+                        }
+                    })
+                    description.isEnabled = false
+                    //isHighlightPerDragEnabled = false
+                    //isHighlightPerTapEnabled = false
+
+                    //requestDisallowInterceptTouchEvent(true)
+                    zoom(10f,1f, centerOffsets.x * 2 ,0f)
+                    invalidate()
+                }
+                initialized = true
+            } else {
+                selectedCoinCandleChartData = null
+                chartCandleStick.data = CandleData(dataSet)
+                chartCandleStick.data.notifyDataChanged()
+
+                chartCandleStick.apply {
+                    notifyDataSetChanged()
+                    invalidate()
+                }
             }
         }
 
