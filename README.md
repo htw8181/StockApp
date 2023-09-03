@@ -40,9 +40,11 @@
 - 현재가 조회, 호가 조회 등 서버 연동에 필요한 API 통신은 Retrofit을 적용하였고, 결과처리를 위해 LiveData와 Flow를 적절히 활용함
   주로 1회성 조회는 LiveData를 활용하였고, 실시간 코인정보들은 Flow를 활용하였음.
 - 실시간 코인정보는 WebSocket을 적용하여 수신 받도록 하고 있음
-- MPAndroidChart 라이브러리를 활용하여 Candle Chart 적용
-- 일부 화면은 웹뷰를 통해서도 볼 수 있도록 웹 프론트 화면을 개발예정
-  npm기반 프론트 개발환경을 잡아서 그곳에서 타입스크립트 기반으로 리액트로 개발해 볼 예정
+- MPAndroidChart 라이브러리를 활용하여 Candle,Bar,Line Chart 적용
+- 일부 화면(상세화면-호가 탭)은 웹 프론트 화면을 개발 중이며 웹뷰로 볼 수 있도록 함
+  npm기반 프론트 개발환경을 잡아서 자바스크립트, 타입스크립트로 개발중이며, 추후 리액트로 개발해 볼 예정
+  1. [Frontend Source Git URL](https://github.com/htw8181/stock-frontend-app)
+  2. [Frontend Deploy Git URL](https://github.com/htw8181/htw8181.github.io)
 
 # 사용 기술 
 - Clean Architecture(Data-Domain-Presentation)
