@@ -239,7 +239,7 @@ fun Detail(navController: NavHostController, viewModel: DetailViewModel, coinMar
                         }
                     }
                     HOGA_ORDER_STATE -> {
-                        HogaOrderView(viewModel = viewModel)
+                        HogaOrderView(viewModel = viewModel, marketCode = coinMarketCode.market)
                     }
                     CHART_STATE -> {
                         Box {

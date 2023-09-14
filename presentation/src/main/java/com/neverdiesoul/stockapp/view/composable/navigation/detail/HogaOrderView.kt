@@ -20,7 +20,7 @@ import com.neverdiesoul.stockapp.databinding.DetailHogaTabViewBinding
 import com.neverdiesoul.stockapp.viewmodel.DetailViewModel
 
 @Composable
-fun HogaOrderView(modifier: Modifier = Modifier, viewModel: DetailViewModel) {
+fun HogaOrderView(modifier: Modifier = Modifier, viewModel: DetailViewModel, marketCode: String) {
     val funcName = object{}.javaClass.enclosingMethod?.name
     var backEnabled by remember {
         mutableStateOf(false)
@@ -74,7 +74,7 @@ fun HogaOrderView(modifier: Modifier = Modifier, viewModel: DetailViewModel) {
                     //defaultFixedFontSize = 14; //기본 고정 글꼴 크기, value : 1~72 사이의 숫자
                 }
                 //addJavascriptInterface(Bridge(),"StockAppWebViewBridge")
-                loadUrl("https://htw8181.github.io/")
+                loadUrl("https://htw8181.github.io?marketCode=$marketCode")
                 webView = this
                 backEnabled = true
             }

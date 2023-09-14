@@ -17,7 +17,7 @@ interface ApiInterface {
     suspend fun getCoinMarketCodeAllFromRemote(): Response<List<ResponseCoinMarketCode>>
 
     /**
-     * 마켓 코드 조회
+     * 현재가 정보 조회
      */
     @GET("v1/ticker")
     suspend fun getCoinCurrentPriceFromRemote(@Query("markets") markets: List<String>): Response<List<ResponseCoinCurrentPrice>>
